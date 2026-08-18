@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "pulso-web-app"
+  },
+  "targets": {
+    "pulso-web-app": {
+      "hosting": {
+        "crm": [
+          "pulso-web-app-crm"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
