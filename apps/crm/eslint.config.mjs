@@ -14,7 +14,7 @@ export default [
                 "error",
                 {
                     type: "attribute",
-                    prefix: "app",
+                    prefix: "pulsoCrm",
                     style: "camelCase"
                 }
             ],
@@ -22,7 +22,7 @@ export default [
                 "error",
                 {
                     type: "element",
-                    prefix: "app",
+                    prefix: "pulso-crm",
                     style: "kebab-case"
                 }
             ]
