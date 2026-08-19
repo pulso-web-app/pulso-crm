@@ -2,7 +2,11 @@
   "hosting": {
     "target": "crm",
     "public": "dist/apps/crm/browser",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
     "headers": [
       {
         "source": "**",

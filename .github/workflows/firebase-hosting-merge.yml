@@ -1,0 +1,43 @@
+name: Deploy CRM to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npx nx run crm:lint
+
+      - name: Test
+        run: npx nx run crm:test
+
+      - name: Build
+        run: npx nx run crm:build:production
+
+      - name: Deploy CRM
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PULSO_WEB_APP }}
+          projectId: pulso-web-app
+          target: crm
+          channelId: live
