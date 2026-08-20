@@ -1,1 +1,62 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+
+html {
+	@include mat.theme((
+		color: (
+			primary: mat.$violet-palette,
+			tertiary: mat.$magenta-palette,
+			theme-type: dark,
+		),
+		typography: Roboto,
+		density: 0,
+	));
+
+	color-scheme: dark;
+}
+
+:root {
+	--pulso-color-background: #11141b;
+	--pulso-color-surface: #0a0e15;
+	--pulso-color-surface-hover: #211d31;
+	--pulso-color-surface-active: #3b276d;
+	--pulso-color-border: #302943;
+	--pulso-color-divider: #252036;
+	--pulso-color-text: #f1edff;
+	--pulso-color-text-muted: #b9b0ce;
+	--pulso-color-text-inverse: #11141b;
+	--pulso-color-accent: #c4b5fd;
+
+	--pulso-space-1: 0.25rem;
+	--pulso-space-2: 0.5rem;
+	--pulso-space-3: 0.75rem;
+	--pulso-space-4: 1rem;
+	--pulso-space-5: 1.25rem;
+	--pulso-space-6: 1.5rem;
+	--pulso-space-8: 2rem;
+
+	--pulso-radius-sm: 4px;
+	--pulso-radius-md: 8px;
+	--pulso-radius-lg: 12px;
+
+	--pulso-content-max-width: 90rem;
+	--pulso-shadow-surface: 0 1px 2px rgb(0 0 0 / 20%);
+	--pulso-transition-fast: 150ms ease;
+}
+
+html,
+body {
+	min-height: 100%;
+	margin: 0;
+	background:
+		radial-gradient(circle at 12% 18%, rgb(124 58 237 / 12%), transparent 30rem),
+		radial-gradient(circle at 88% 82%, rgb(217 70 239 / 9%), transparent 28rem),
+		var(--pulso-color-background);
+	color: var(--pulso-color-text);
+	font-family: Roboto, Arial, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
