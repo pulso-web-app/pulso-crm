@@ -26,4 +26,12 @@ describe('App', () => {
 
     expect(compiled.querySelector('router-outlet')).toBeTruthy();
   });
+
+  it('should render the loading overlay component', () => {
+    const fixture = TestBed.createComponent(App);
+
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('pulso-crm-loading-overlay')).toBeTruthy();
+  });
 });
