@@ -1,4 +1,18 @@
 <section class="contacts-page">
-  <h1>Contatos</h1>
-  <p>A listagem de contatos será implementada aqui.</p>
+  <mat-form-field class="example-form-field">
+    <mat-label>Buscar Contatos</mat-label>
+    <mat-icon matPrefix>search</mat-icon>
+    <input matInput type="text" [(ngModel)]="value" />
+    @if (value()) {
+      <button
+        matSuffix
+        matIconButton
+        aria-label="Clear"
+        (click)="value.set('')"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+  <pulso-crm-contact-metric-cards />
 </section>

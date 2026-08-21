@@ -1,7 +1,10 @@
 import {
-  withNativeFederation,
   shareAll,
+  shareAngularLocales,
+  withNativeFederation,
 } from '@angular-architects/native-federation/config';
+
+const ptLocale = shareAngularLocales(['pt'])['@angular/common/locales/pt'];
 
 export default withNativeFederation({
   name: 'crm',
@@ -27,12 +30,28 @@ export default withNativeFederation({
             build: 'package',
             includeSecondaries: { keepAll: true },
           },
+          '@angular/common': {
+            singleton: true,
+            strictVersion: true,
+            requiredVersion: 'auto',
+            build: 'package',
+            includeSecondaries: { keepAll: true },
+          },
         },
       },
     ),
+    '@angular/common/locales/pt': {
+      ...ptLocale,
+      includeSecondaries: { keepAll: true },
+    },
   },
 
-  skip: ['rxjs/ajax', 'rxjs/fetch', 'rxjs/testing', 'rxjs/webSocket'],
+  skip: [
+    'rxjs/ajax',
+    'rxjs/fetch',
+    'rxjs/testing',
+    'rxjs/webSocket',
+  ],
 
   features: {
     denseChunking: true,

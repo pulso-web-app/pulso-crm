@@ -1,0 +1,10 @@
+<div class="metric-cards-grid" pulsoCrmEqualWidthGrid>
+  @for (metric of metrics; track metric.title) {
+    <pulso-crm-metric-card
+      [cardTitle]="metric.title"
+      [cardValue]="metric.value"
+      [icon]="metric.icon"
+      [color]="metric.color"
+    />
+  }
+</div>

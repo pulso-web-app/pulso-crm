@@ -1,0 +1,15 @@
+:host {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: var(--pulso-space-1);
+}
+
+.metric-cards-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--pulso-equal-width-grid-column, max-content);
+  gap: var(--pulso-space-3);
+  width: max-content;
+  min-width: 100%;
+}
