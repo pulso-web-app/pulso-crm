@@ -55,7 +55,37 @@
       "unitTestRunner": "vitest-angular"
     },
     "@nx/angular:component": {
-      "style": "css"
+      "style": "scss",
+      "type": "component",
+      "standalone": true,
+      "changeDetection": "OnPush",
+      "skipTests": false
+    },
+    "@nx/angular:service": {
+      "type": "service",
+      "skipTests": false
+    },
+    "@nx/angular:guard": {
+      "typeSeparator": ".",
+      "skipTests": false
+    },
+    "@nx/angular:directive": {
+      "type": "directive",
+      "standalone": true,
+      "skipTests": false
+    },
+    "@nx/angular:pipe": {
+      "typeSeparator": ".",
+      "standalone": true,
+      "skipTests": false
+    },
+    "@nx/angular:interceptor": {
+      "typeSeparator": ".",
+      "skipTests": false
+    },
+    "@nx/angular:resolver": {
+      "typeSeparator": ".",
+      "skipTests": false
     }
   }
 }
