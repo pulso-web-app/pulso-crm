@@ -50,6 +50,8 @@
     "test": {
       "executor": "@angular/build:unit-test",
       "options": {
+        "buildTarget": "crm:esbuild:development",
+        "setupFiles": ["apps/crm/src/test-setup.ts"],
         "watch": false
       }
     },
