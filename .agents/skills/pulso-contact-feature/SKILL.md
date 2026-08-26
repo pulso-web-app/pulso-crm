@@ -14,4 +14,6 @@ description: Design and implement Pulso CRM contact capabilities while preservin
 7. Test the narrowest affected Nx projects and user-observable screen behavior. Verify port 4201 standalone and, for route-contract changes, integration through the shell.
 8. Run `npm run check` and document graph, federation, data, UI, and deployment impact.
 
+Use `Pulso: Create Feature Here` for a vertical slice inside `contacts-feature`. Use `Pulso: Create Library Here` only when concrete contact behavior justifies a domain, data-access, UI, or util boundary; register capability dependencies in `architecture.config.json` instead of editing ESLint constraints directly.
+
 Do not fabricate backend persistence, leak customer data, or deploy.

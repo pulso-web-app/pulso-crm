@@ -29,9 +29,13 @@ This avoids two extremes: a single undifferentiated application project and empt
 
 Nx tags enforce dependency direction. The application composes feature libraries; features may use lower-level contact or shared UI projects; domain, data-access, and UI layers must never depend back on features. Cross-project imports use `@pulso-crm/*` public APIs.
 
+Capability permissions live in `architecture.config.json` and are converted into ESLint module-boundary constraints. Use the Tooling library generator for a justified lower-level boundary and its feature generator for vertical slices; do not duplicate scope rules manually.
+
 ## Federation boundary
 
 The shell owns authentication and the protected mount point. CRM owns navigation and behavior inside it. The remote name, `./Routes` exposure, top-level route expectations, and port are public contracts. A future CRM MFE split is justified only by independent runtime ownership or deployment, not simply by adding another screen.
+
+The exposed module provides the common `REMOTE_ROUTES` contract. `CRM_ROUTES` remains an identity-compatible alias for existing consumers.
 
 ## Why Nx is material here
 

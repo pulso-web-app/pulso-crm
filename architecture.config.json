@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "appScope": "crm",
+  "capabilities": {
+    "contacts": { "dependsOn": ["shared"] },
+    "crm": { "dependsOn": ["contacts", "shared"] },
+    "shared": { "dependsOn": [] }
+  }
+}

@@ -48,6 +48,8 @@ Standalone mode is best for focused UI work. Use integrated mode for federation,
 
 ## Commands
 
+From the multi-root workspace, use **Pulso: Create Feature Here** for a contacts slice and **Pulso: Create Library Here** only for a justified domain, data-access, UI, or util boundary. Both commands preview canonical paths, aliases, and tags before writing.
+
 | Command                 | Purpose                                                          |
 | ----------------------- | ---------------------------------------------------------------- |
 | `npm run dev`           | Serve CRM on port 4201.                                          |

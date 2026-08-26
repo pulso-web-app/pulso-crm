@@ -21,6 +21,8 @@ This Angular/Nx repository is the CRM Native Federation remote. It owns the cont
 - The remote exposes `./Routes`; coordinate contract changes with `pulso-shell`.
 - Do not import application code from sibling repositories or move shell authentication into this remote.
 - Keep feature code inside explicit contacts boundaries rather than generic shared folders.
+- Register capabilities in `architecture.config.json`; scope constraints are derived and must not be duplicated manually in ESLint.
+- Export new federation consumers through `REMOTE_ROUTES` while preserving `CRM_ROUTES` compatibility.
 
 ## Commands
 

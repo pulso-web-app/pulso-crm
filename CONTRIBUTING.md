@@ -19,6 +19,8 @@ Use a reviewed OpenSpec change for non-trivial behavior. If shell integration or
 
 Avoid unrelated formatting and refactors. Never add real customer data, credentials, tokens, or unapproved service endpoints.
 
+Prefer `Pulso: Create Feature Here` for a vertical slice and `Pulso: Create Library Here` only for a justified Nx boundary. Capability dependencies belong in `architecture.config.json`, and generated libraries expose intentional APIs only through `src/index.ts`.
+
 ## Pull requests
 
 Explain what the user can now do, what remains out of scope, and whether persistence is real. Link the OpenSpec change, include screenshots for visible changes, and call out federation, data migration, hosting, and rollback impact.

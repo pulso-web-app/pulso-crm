@@ -14,3 +14,5 @@ export const CRM_ROUTES: Routes = [
       ),
   },
 ];
+
+export const REMOTE_ROUTES = CRM_ROUTES;

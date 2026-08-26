@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 test('renders the contacts page', async ({ page }) => {
   await page.goto('/');
 
-  const search = page.getByRole('textbox', { name: 'Buscar Contatos' });
+  const search = page.getByLabel('Buscar Contatos', { exact: true });
 
   await expect(search).toBeVisible();
   await expect(
