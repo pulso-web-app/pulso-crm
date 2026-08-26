@@ -7,9 +7,5 @@
   flex-direction: column;
   padding: var(--pulso-space-6);
   color: var(--pulso-color-text);
-}
-
-p {
-  margin-top: var(--pulso-space-3);
-  color: var(--pulso-color-text-muted);
+  gap: var(--pulso-space-6);
 }

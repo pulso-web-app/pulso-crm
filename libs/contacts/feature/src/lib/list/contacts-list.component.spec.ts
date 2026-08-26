@@ -18,4 +18,11 @@ describe('ContactsListComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should compose metrics and filters', () => {
+    const host = fixture.nativeElement as HTMLElement;
+
+    expect(host.querySelector('pulso-crm-contact-metric-cards')).not.toBeNull();
+    expect(host.querySelector('pulso-crm-contact-filters')).not.toBeNull();
+  });
 });

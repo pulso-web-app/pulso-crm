@@ -29,7 +29,7 @@
       "options": {
         "target": "crm:serve-original:development",
         "rebuildDelay": 500,
-        "cacheExternalArtifacts": true,
+        "cacheExternalArtifacts": false,
         "dev": true,
         "devServer": true,
         "port": 0

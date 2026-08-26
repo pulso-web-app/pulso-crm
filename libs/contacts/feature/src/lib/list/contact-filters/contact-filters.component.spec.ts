@@ -19,9 +19,10 @@ describe('ContactFiltersComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should have empty initial selection states', () => {
+  it('should start with empty filter state', () => {
     expect(component.selectedStage()).toBeNull();
     expect(component.selectedStatus()).toBeNull();
+    expect(component.searchContact()).toBe('');
     expect(component.hasActiveFilters()).toBe(false);
   });
 
@@ -39,9 +40,32 @@ describe('ContactFiltersComponent', () => {
     expect(component.hasActiveFilters()).toBe(true);
   });
 
+  it('should mark a non-blank search as an active filter', () => {
+    component.searchContact.set('   ');
+    expect(component.hasActiveFilters()).toBe(false);
+
+    component.searchContact.set('Maria');
+    expect(component.hasActiveFilters()).toBe(true);
+  });
+
+  it('should clear the search from its suffix action', () => {
+    component.searchContact.set('Maria');
+    fixture.detectChanges();
+
+    const clearSearchButton = fixture.nativeElement.querySelector(
+      'button[aria-label="Limpar busca"]',
+    ) as HTMLButtonElement | null;
+
+    expect(clearSearchButton).not.toBeNull();
+    clearSearchButton?.click();
+
+    expect(component.searchContact()).toBe('');
+  });
+
   it('should clear all filters when clearAllFilters is called', () => {
-    component.selectedStage.set('novo');
+    component.selectedStage.set('contact');
     component.selectedStatus.set('ativo');
+    component.searchContact.set('Maria');
     fixture.detectChanges();
     expect(component.hasActiveFilters()).toBe(true);
 
@@ -50,6 +74,7 @@ describe('ContactFiltersComponent', () => {
 
     expect(component.selectedStage()).toBeNull();
     expect(component.selectedStatus()).toBeNull();
+    expect(component.searchContact()).toBe('');
     expect(component.hasActiveFilters()).toBe(false);
   });
 });

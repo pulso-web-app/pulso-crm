@@ -3,14 +3,18 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'pulso-crm-contact-filters',
   imports: [
-    MatFormFieldModule,
     MatSelectModule,
-    MatIconModule,
+    MatFormFieldModule,
+    FormsModule,
     MatButtonModule,
+    MatIconModule,
+    MatInputModule,
   ],
   templateUrl: './contact-filters.component.html',
   styleUrl: './contact-filters.component.scss',
@@ -18,6 +22,7 @@ import { MatButtonModule } from '@angular/material/button';
 export class ContactFiltersComponent {
   readonly selectedStage = signal<string | null>(null);
   readonly selectedStatus = signal<string | null>(null);
+  readonly searchContact = signal<string>('');
 
   readonly stages = [
     { value: 'contact', viewValue: 'Contato' },
@@ -36,11 +41,15 @@ export class ContactFiltersComponent {
   ];
 
   readonly hasActiveFilters = computed(
-    () => this.selectedStage() !== null || this.selectedStatus() !== null,
+    () =>
+      this.selectedStage() !== null ||
+      this.selectedStatus() !== null ||
+      this.searchContact().trim() !== '',
   );
 
   clearAllFilters(): void {
     this.selectedStage.set(null);
     this.selectedStatus.set(null);
+    this.searchContact.set('');
   }
 }
