@@ -1,1 +1,1 @@
-export { CONTACTS_ROUTES } from './lib/contacts/contacts.routes';
+export { CONTACTS_ROUTES } from './lib/contacts.routes';

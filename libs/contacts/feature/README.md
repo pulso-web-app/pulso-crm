@@ -4,4 +4,6 @@
 
 The remote consumes its public `CONTACTS_ROUTES` API through `@pulso-crm/contacts-feature`. Other projects must not import internal files.
 
+The internal layout is capability-first: routed screens live in `list`, `create`, `detail`, and `edit`; components used only by the list stay beside it. Do not create empty `domain`, `data-access`, form, interaction, or generic component folders. Extract a separate Nx project only when implemented behavior requires that boundary.
+
 Run `npx nx test contacts-feature` for focused tests.

@@ -4,8 +4,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
-import { ContactMetricCardsComponent } from './components/contact-metric-cards/contact-metric-cards.component';
-import { ContactFiltersComponent } from './components/contact-filters/contact-filters.component';
+import { ContactMetricCardsComponent } from './contact-metric-cards/contact-metric-cards.component';
+import { ContactFiltersComponent } from './contact-filters/contact-filters.component';
 
 @Component({
   selector: 'pulso-crm-contacts-list',

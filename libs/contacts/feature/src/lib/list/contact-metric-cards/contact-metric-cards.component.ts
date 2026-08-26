@@ -3,7 +3,7 @@ import { EqualWidthGridDirective } from '@pulso-crm/shared-ui';
 import {
   MetricCardColor,
   MetricCardComponent,
-} from './components/metric-card/metric-card.component';
+} from './metric-card/metric-card.component';
 
 interface ContactMetric {
   readonly title: string;
