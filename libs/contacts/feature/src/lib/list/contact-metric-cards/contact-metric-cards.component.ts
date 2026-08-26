@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { EqualWidthGridDirective } from '@pulso-crm/shared-ui';
 import {
   MetricCardColor,
   MetricCardComponent,
@@ -14,7 +13,7 @@ interface ContactMetric {
 
 @Component({
   selector: 'pulso-crm-contact-metric-cards',
-  imports: [EqualWidthGridDirective, MetricCardComponent],
+  imports: [ MetricCardComponent],
   templateUrl: './contact-metric-cards.component.html',
   styleUrl: './contact-metric-cards.component.scss',
 })
