@@ -25,7 +25,7 @@
       placeholder="Estágio"
     >
       @for (stage of stages; track stage.value) {
-        <mat-option [value]="stage.value">{{ stage.viewValue }}</mat-option>
+        <mat-option [value]="stage.value">{{ stage.label }}</mat-option>
       }
     </mat-select>
     @if (selectedStage()) {
@@ -51,7 +51,7 @@
       placeholder="Status"
     >
       @for (status of statuses; track status.value) {
-        <mat-option [value]="status.value">{{ status.viewValue }}</mat-option>
+        <mat-option [value]="status.value">{{ status.label }}</mat-option>
       }
     </mat-select>
     @if (selectedStatus()) {
@@ -85,8 +85,8 @@
     Importar
   </button>
 
-  <button mat-flat-button color="primary">
+  <a mat-flat-button color="primary" routerLink="new">
     <mat-icon>add</mat-icon>
     Novo contato
-  </button>
+  </a>
 </div>

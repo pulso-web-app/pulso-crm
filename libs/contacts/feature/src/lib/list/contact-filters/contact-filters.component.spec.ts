@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { ContactFiltersComponent } from './contact-filters.component';
 
 describe('ContactFiltersComponent', () => {
@@ -8,6 +9,7 @@ describe('ContactFiltersComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ContactFiltersComponent],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ContactFiltersComponent);
@@ -27,16 +29,16 @@ describe('ContactFiltersComponent', () => {
   });
 
   it('should correctly mark active filters when a stage is selected', () => {
-    component.selectedStage.set('novo');
+    component.selectedStage.set('cold-lead');
     fixture.detectChanges();
-    expect(component.selectedStage()).toBe('novo');
+    expect(component.selectedStage()).toBe('cold-lead');
     expect(component.hasActiveFilters()).toBe(true);
   });
 
   it('should correctly mark active filters when a status is selected', () => {
-    component.selectedStatus.set('ativo');
+    component.selectedStatus.set('contacted');
     fixture.detectChanges();
-    expect(component.selectedStatus()).toBe('ativo');
+    expect(component.selectedStatus()).toBe('contacted');
     expect(component.hasActiveFilters()).toBe(true);
   });
 
@@ -64,7 +66,7 @@ describe('ContactFiltersComponent', () => {
 
   it('should clear all filters when clearAllFilters is called', () => {
     component.selectedStage.set('contact');
-    component.selectedStatus.set('ativo');
+    component.selectedStatus.set('contacted');
     component.searchContact.set('Maria');
     fixture.detectChanges();
     expect(component.hasActiveFilters()).toBe(true);

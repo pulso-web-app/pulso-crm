@@ -1,4 +1,52 @@
 <section class="contacts-page">
   <pulso-crm-contact-metric-cards />
-  <pulso-crm-contact-filters />
+  <pulso-crm-contact-filters
+    [searchContact]="searchQuery()"
+    [selectedStage]="selectedStage()"
+    [selectedStatus]="selectedStatus()"
+    (searchContactChange)="updateSearch($event)"
+    (selectedStageChange)="updateStage($event)"
+    (selectedStatusChange)="updateStatus($event)"
+  />
+
+  <div class="results-summary" aria-live="polite">
+    <span>
+      {{ filteredContacts().length }}
+      {{
+        filteredContacts().length === 1
+          ? 'contato encontrado'
+          : 'contatos encontrados'
+      }}
+    </span>
+  </div>
+
+  @if (visibleContacts().length) {
+    <div class="contacts-grid">
+      @for (contact of visibleContacts(); track contact.id) {
+        <pulso-crm-contact-card [contact]="contact" />
+      }
+    </div>
+
+    @if (filteredContacts().length > pageSize()) {
+      <mat-paginator
+        [length]="filteredContacts().length"
+        [pageIndex]="pageIndex()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[9, 18, 27]"
+        [showFirstLastButtons]="true"
+        (page)="handlePageChange($event)"
+        aria-label="Paginação de contatos"
+      />
+    }
+  } @else {
+    <section class="empty-state" aria-labelledby="empty-state-title">
+      <mat-icon aria-hidden="true">person_search</mat-icon>
+      <h2 id="empty-state-title">Nenhum contato encontrado</h2>
+      <p>Tente ajustar a busca ou remover os filtros aplicados.</p>
+      <button mat-stroked-button (click)="clearFilters()">
+        <mat-icon>filter_alt_off</mat-icon>
+        Limpar filtros
+      </button>
+    </section>
+  }
 </section>
