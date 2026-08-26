@@ -37,6 +37,35 @@ export default withNativeFederation({
             build: 'package',
             includeSecondaries: { keepAll: true },
           },
+          // Usage inside Nx path-mapped libraries is not visible to the
+          // default dependency pruner. Share Material and CDK explicitly.
+          '@angular/material': {
+            singleton: true,
+            strictVersion: true,
+            requiredVersion: 'auto',
+            build: 'package',
+            includeSecondaries: {
+              keepAll: true,
+              skip: [
+                '@angular/material/*/testing',
+                '@angular/material/form-field/testing/control',
+              ],
+            },
+          },
+          '@angular/cdk': {
+            singleton: true,
+            strictVersion: true,
+            requiredVersion: 'auto',
+            build: 'package',
+            includeSecondaries: {
+              keepAll: true,
+              skip: [
+                '@angular/cdk/schematics',
+                '@angular/cdk/testing',
+                '@angular/cdk/testing/*',
+              ],
+            },
+          },
         },
       },
     ),
@@ -47,6 +76,10 @@ export default withNativeFederation({
   },
 
   skip: [
+    // These package roots are consumed by Sass. Their runtime secondary
+    // entry points remain shared explicitly above.
+    '@angular/material',
+    '@angular/cdk',
     'rxjs/ajax',
     'rxjs/fetch',
     'rxjs/testing',

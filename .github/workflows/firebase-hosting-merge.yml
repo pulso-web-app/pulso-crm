@@ -32,13 +32,13 @@ jobs:
         run: npm run spec:validate
 
       - name: Lint
-        run: npx nx run crm:lint
+        run: npm run lint
 
       - name: Test
-        run: npx nx run crm:test
+        run: npm test
 
       - name: Build
-        run: npx nx run crm:build:production
+        run: npm run build
 
       - name: Deploy CRM
         uses: FirebaseExtended/action-hosting-deploy@v0

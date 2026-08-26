@@ -5,12 +5,13 @@ description: Design and implement Pulso CRM contact capabilities while preservin
 
 # Pulso Contact Feature
 
-1. Read the root and contacts `AGENTS.md` files.
+1. Read the root, library, and contacts `AGENTS.md` files.
 2. Explore the current routed screen and identify whether persistence is real, mocked, or absent; do not infer capabilities from visual scaffolding.
 3. Create or update the local OpenSpec change before non-trivial implementation.
-4. Place invariants in `domain`, integrations in `data-access`, routed screens in `features`, reusable form logic in `form`, and UI actions in `interactions`.
-5. Define loading, empty, success, validation, and failure behavior relevant to the change.
-6. Test domain rules and user-observable screen behavior. Verify port 4201 standalone and, for route-contract changes, integration through the shell.
-7. Run `npm run check` and document federation, data, UI, and deployment impact.
+4. Keep behavior in `contacts-feature` while it is cohesive. Extract a domain, data-access, form, or interaction Nx project only when real rules, integrations, reuse, or ownership justify an independently testable boundary.
+5. Use `@pulso-crm/*` public entry points across projects and preserve Nx scope/type dependency constraints.
+6. Define loading, empty, success, validation, and failure behavior relevant to the change.
+7. Test the narrowest affected Nx projects and user-observable screen behavior. Verify port 4201 standalone and, for route-contract changes, integration through the shell.
+8. Run `npm run check` and document graph, federation, data, UI, and deployment impact.
 
 Do not fabricate backend persistence, leak customer data, or deploy.

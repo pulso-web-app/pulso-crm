@@ -11,10 +11,11 @@ Use a reviewed OpenSpec change for non-trivial behavior. If shell integration or
 1. Run `npm ci`.
 2. Explore the current route, feature boundary, and tests.
 3. Define user outcomes, data ownership, failure behavior, and non-goals in OpenSpec.
-4. Implement in the appropriate domain, data-access, feature, form, or interaction boundary.
-5. Add focused tests and run `npm run check`.
-6. For route-contract changes, verify standalone CRM and authenticated shell integration.
-7. Complete the pull-request template with evidence and honest maturity notes.
+4. Implement in the cohesive contacts feature first; extract domain, data-access, form, or interaction projects only when concrete behavior gives the boundary meaning.
+5. Import other Nx projects through public `@pulso-crm/*` APIs and add focused project tests.
+6. Inspect `npm run graph` or run `npm run affected` when useful, then run `npm run check`.
+7. For route-contract changes, verify standalone CRM and authenticated shell integration.
+8. Complete the pull-request template with evidence and honest maturity notes.
 
 Avoid unrelated formatting and refactors. Never add real customer data, credentials, tokens, or unapproved service endpoints.
 

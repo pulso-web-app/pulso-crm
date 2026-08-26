@@ -9,7 +9,7 @@ The repository currently implements the contacts navigation and visual foundatio
 - Contacts list route with search and summary presentation.
 - New-contact route and form shell.
 - Contact details and edit route shells.
-- Feature folders for domain, data access, routed features, forms, and interactions.
+- A feature-first `contacts-feature` Nx project and CRM-local `shared-ui` project.
 
 The current screens are an evolving product surface. Durable contact persistence and a complete backend integration are not yet implemented, so contributors must not treat display data or UI scaffolding as production data behavior.
 
@@ -48,33 +48,32 @@ Standalone mode is best for focused UI work. Use integrated mode for federation,
 
 ## Commands
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Serve CRM on port 4201. |
-| `npm run build` | Create a production build. |
-| `npm run lint` | Run ESLint. |
-| `npm test` | Run Vitest once. |
-| `npm run test:watch` | Run unit tests in watch mode. |
-| `npm run e2e` | Run Playwright against standalone CRM. |
-| `npm run format` | Apply Nx formatting. |
-| `npm run format:check` | Check formatting without writing. |
-| `npm run docs:check` | Lint authored Markdown. |
-| `npm run spec:validate` | Strictly validate all OpenSpec artifacts. |
-| `npm run spec:update` | Refresh OpenSpec-managed agent integrations. |
-| `npm run check` | Run docs, specs, lint, unit tests, and production build. |
-| `npm run graph` | Open the Nx project graph. |
+| Command                 | Purpose                                                          |
+| ----------------------- | ---------------------------------------------------------------- |
+| `npm run dev`           | Serve CRM on port 4201.                                          |
+| `npm run build`         | Create a production build.                                       |
+| `npm run lint`          | Run ESLint.                                                      |
+| `npm test`              | Run Vitest once.                                                 |
+| `npm run test:watch`    | Run unit tests in watch mode.                                    |
+| `npm run e2e`           | Run Playwright against standalone CRM.                           |
+| `npm run format`        | Apply Nx formatting.                                             |
+| `npm run format:check`  | Check formatting without writing.                                |
+| `npm run docs:check`    | Lint authored Markdown.                                          |
+| `npm run spec:validate` | Strictly validate all OpenSpec artifacts.                        |
+| `npm run spec:update`   | Refresh OpenSpec-managed agent integrations.                     |
+| `npm run check`         | Run docs, specs, lint, unit tests, and production build.         |
+| `npm run graph`         | Open the Nx project graph.                                       |
+| `npm run affected`      | Lint, test, and build projects affected by the current Git diff. |
 
 ## Feature boundaries
 
-Contacts code is organized by responsibility:
+Contacts code is grouped by capability first:
 
-- `domain` — contact models and business invariants.
-- `data-access` — state, gateways, and external data integration.
-- `features` — routed screens and feature composition.
-- `form` — reusable contact-form behavior.
-- `interactions` — focused user actions and UI interactions.
+- `contacts-feature` owns the current list, create, detail, edit, and route composition.
+- `shared-ui` contains only CRM-local, domain-neutral presentation.
+- `crm` is the thin bootstrap and Native Federation adapter.
 
-Do not hide persistence inside visual components or place feature-specific code in a generic shared directory.
+Extract contact domain, data-access, form, or interaction projects only when concrete rules, state, integrations, or reuse create meaningful boundaries. Cross-project imports use `@pulso-crm/*` public APIs, and Nx tags enforce dependency direction. A new screen does not require another MFE while it shares CRM ownership and deployment.
 
 ## Testing
 

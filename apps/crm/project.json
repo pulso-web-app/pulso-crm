@@ -4,10 +4,11 @@
   "projectType": "application",
   "prefix": "pulso-crm",
   "sourceRoot": "apps/crm/src",
-  "tags": [],
+  "tags": ["scope:crm", "type:app"],
   "targets": {
     "build": {
       "executor": "@angular-architects/native-federation:build",
+      "dependsOn": ["^build"],
       "options": {
         "cacheExternalArtifacts": true
       },

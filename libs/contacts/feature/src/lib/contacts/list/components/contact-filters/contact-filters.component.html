@@ -1,0 +1,77 @@
+<div class="filters-left">
+  <mat-form-field
+    appearance="outline"
+    subscriptSizing="dynamic"
+    class="filter-select"
+  >
+    <mat-select
+      [value]="selectedStage()"
+      (selectionChange)="selectedStage.set($event.value)"
+      placeholder="Estágio"
+    >
+      @for (stage of stages; track stage.value) {
+        <mat-option [value]="stage.value">{{ stage.viewValue }}</mat-option>
+      }
+    </mat-select>
+    @if (selectedStage()) {
+      <button
+        matSuffix
+        mat-icon-button
+        aria-label="Limpar Estágio"
+        (click)="selectedStage.set(null); $event.stopPropagation()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+
+  <mat-form-field
+    appearance="outline"
+    subscriptSizing="dynamic"
+    class="filter-select"
+  >
+    <mat-select
+      [value]="selectedStatus()"
+      (selectionChange)="selectedStatus.set($event.value)"
+      placeholder="Status"
+    >
+      @for (status of statuses; track status.value) {
+        <mat-option [value]="status.value">{{ status.viewValue }}</mat-option>
+      }
+    </mat-select>
+    @if (selectedStatus()) {
+      <button
+        matSuffix
+        mat-icon-button
+        aria-label="Limpar Status"
+        (click)="selectedStatus.set(null); $event.stopPropagation()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  </mat-form-field>
+
+  <button mat-stroked-button>
+    <mat-icon>filter_list</mat-icon>
+    Mais filtros
+  </button>
+
+  @if (hasActiveFilters()) {
+    <button mat-button color="primary" (click)="clearAllFilters()">
+      <mat-icon>filter_alt_off</mat-icon>
+      Limpar filtros
+    </button>
+  }
+</div>
+
+<div class="filters-right">
+  <button mat-stroked-button color="primary">
+    <mat-icon>file_upload</mat-icon>
+    Importar
+  </button>
+
+  <button mat-flat-button color="primary">
+    <mat-icon>add</mat-icon>
+    Novo contato
+  </button>
+</div>

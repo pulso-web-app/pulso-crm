@@ -1,0 +1,18 @@
+:host {
+  display: block;
+}
+
+.contacts-page {
+  padding: var(--pulso-space-6);
+  color: var(--pulso-color-text);
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+p {
+  margin-top: var(--pulso-space-3);
+  color: var(--pulso-color-text-muted);
+}

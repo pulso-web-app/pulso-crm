@@ -14,7 +14,10 @@ This Angular/Nx repository is the CRM Native Federation remote. It owns the cont
 
 ## Architecture Boundaries
 
-- CRM owns contact domain, data-access, feature, form, and interaction behavior.
+- Keep `apps/crm` as a thin bootstrap/federation adapter and put owned behavior in feature-first projects under `libs/<capability>/<type>`.
+- Keep the current contacts screens cohesive in `contacts-feature`; extract domain, data-access, form, or interaction projects only when real behavior creates those boundaries.
+- Import Nx projects only through `@pulso-crm/*` public entry points and preserve the enforced scope/type dependency direction.
+- Do not split screens into additional microfrontends without independent runtime ownership and deployment.
 - The remote exposes `./Routes`; coordinate contract changes with `pulso-shell`.
 - Do not import application code from sibling repositories or move shell authentication into this remote.
 - Keep feature code inside explicit contacts boundaries rather than generic shared folders.
@@ -26,6 +29,7 @@ This Angular/Nx repository is the CRM Native Federation remote. It owns the cont
 - `npm run e2e` — run standalone Playwright tests.
 - `npm run check` — documentation, specifications, lint, unit tests, and production build.
 - `npm run spec:validate` — strict OpenSpec validation.
+- `npm run affected` — run lint, tests, and builds only for projects affected by the current Git diff.
 
 ## Spec-Driven Development
 
