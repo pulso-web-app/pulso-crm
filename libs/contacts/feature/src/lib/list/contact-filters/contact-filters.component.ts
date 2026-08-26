@@ -1,10 +1,17 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, computed, model } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
+import { RouterLink } from '@angular/router';
+import {
+  CONTACT_STAGE_OPTIONS,
+  CONTACT_STATUS_OPTIONS,
+  ContactStage,
+  ContactStatus,
+} from '../contact.models';
 
 @Component({
   selector: 'pulso-crm-contact-filters',
@@ -15,30 +22,18 @@ import { MatInputModule } from '@angular/material/input';
     MatButtonModule,
     MatIconModule,
     MatInputModule,
+    RouterLink,
   ],
   templateUrl: './contact-filters.component.html',
   styleUrl: './contact-filters.component.scss',
 })
 export class ContactFiltersComponent {
-  readonly selectedStage = signal<string | null>(null);
-  readonly selectedStatus = signal<string | null>(null);
-  readonly searchContact = signal<string>('');
+  readonly selectedStage = model<ContactStage | null>(null);
+  readonly selectedStatus = model<ContactStatus | null>(null);
+  readonly searchContact = model('');
 
-  readonly stages = [
-    { value: 'contact', viewValue: 'Contato' },
-    { value: 'cold-lead', viewValue: 'Lead Frio' },
-    { value: 'warm-lead', viewValue: 'Lead Morno' },
-    { value: 'hot-lead', viewValue: 'Lead Quente' },
-    { value: 'client', viewValue: 'Cliente' },
-    { value: 'no-response', viewValue: 'Sem Resposta' },
-    { value: 'not-interested', viewValue: 'Não Interessado' },
-  ];
-
-  readonly statuses = [
-    { value: 'ativo', viewValue: 'Contatado' },
-    { value: 'inativo', viewValue: 'Inativo' },
-    { value: 'arquivado', viewValue: 'Arquivado' },
-  ];
+  readonly stages = CONTACT_STAGE_OPTIONS;
+  readonly statuses = CONTACT_STATUS_OPTIONS;
 
   readonly hasActiveFilters = computed(
     () =>

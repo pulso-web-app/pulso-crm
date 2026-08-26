@@ -1,0 +1,169 @@
+:host {
+  --contact-stage-background: var(--pulso-color-primary-container);
+  --contact-stage-color: var(--pulso-color-on-primary-container);
+  --contact-status-background: var(--pulso-color-default-container);
+  --contact-status-color: var(--pulso-color-on-default-container);
+
+  display: block;
+  min-width: 0;
+}
+
+:host([data-stage='cold-lead']) {
+  --contact-stage-background: #18375f;
+  --contact-stage-color: #9bc7ff;
+}
+
+:host([data-stage='warm-lead']) {
+  --contact-stage-background: #4a3d14;
+  --contact-stage-color: #ffe27b;
+}
+
+:host([data-stage='hot-lead']) {
+  --contact-stage-background: var(--pulso-color-error-container);
+  --contact-stage-color: var(--pulso-color-on-error-container);
+}
+
+:host([data-stage='client']) {
+  --contact-stage-background: var(--pulso-color-success-container);
+  --contact-stage-color: var(--pulso-color-on-success-container);
+}
+
+:host([data-stage='no-response']) {
+  --contact-stage-background: var(--pulso-color-default-container);
+  --contact-stage-color: var(--pulso-color-on-default-container);
+}
+
+:host([data-stage='not-interested']) {
+  --contact-stage-background: #4c252b;
+  --contact-stage-color: #ff9aa7;
+}
+
+:host([data-status='contacted']) {
+  --contact-status-background: #1b335d;
+  --contact-status-color: #9ec4ff;
+}
+
+:host([data-status='awaiting-response']) {
+  --contact-status-background: var(--pulso-color-primary-container);
+  --contact-status-color: var(--pulso-color-on-primary-container);
+}
+
+mat-card {
+  height: 100%;
+  background: var(--pulso-color-section-background);
+  border-color: var(--pulso-color-border);
+  box-shadow: var(--pulso-shadow-surface);
+}
+
+mat-card-header {
+  position: relative;
+  padding: var(--pulso-space-4) var(--pulso-space-4) var(--pulso-space-2);
+}
+
+mat-card-title {
+  font-size: var(--pulso-text-md);
+  line-height: 1.35;
+}
+
+mat-card-subtitle {
+  color: var(--pulso-color-text-muted);
+}
+
+.contact-avatar {
+  display: grid;
+  place-items: center;
+  color: #11141b;
+  background: #b9a6ff;
+  font-weight: 600;
+}
+
+.contact-avatar[data-tone='blue'] {
+  background: #9bbdff;
+}
+
+.contact-avatar[data-tone='green'] {
+  background: #91d1aa;
+}
+
+.contact-avatar[data-tone='orange'] {
+  background: #ffb49f;
+}
+
+.contact-avatar[data-tone='pink'] {
+  background: #f299d0;
+}
+
+.contact-avatar[data-tone='cyan'] {
+  background: #8ed7da;
+}
+
+.contact-menu {
+  position: absolute;
+  top: var(--pulso-space-2);
+  right: var(--pulso-space-2);
+}
+
+mat-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pulso-space-3);
+  padding: var(--pulso-space-2) var(--pulso-space-4) var(--pulso-space-3);
+}
+
+mat-chip-set {
+  min-height: 2rem;
+}
+
+.stage-chip,
+.status-chip {
+  --mdc-chip-label-text-size: 0.75rem;
+}
+
+.stage-chip {
+  --mdc-chip-elevated-container-color: var(--contact-stage-background);
+  --mdc-chip-label-text-color: var(--contact-stage-color);
+}
+
+.status-chip {
+  --mdc-chip-elevated-container-color: var(--contact-status-background);
+  --mdc-chip-label-text-color: var(--contact-status-color);
+}
+
+.contact-channels {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pulso-space-2);
+  color: var(--pulso-color-text-muted);
+}
+
+.contact-channel {
+  display: flex;
+  align-items: center;
+  gap: var(--pulso-space-2);
+  min-width: 0;
+  font-size: var(--pulso-text-sm);
+}
+
+.contact-channel mat-icon {
+  flex: 0 0 1.125rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--pulso-color-accent);
+  font-size: 1.125rem;
+}
+
+.contact-channel span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact-channel--empty {
+  font-style: italic;
+}
+
+mat-card-footer {
+  padding: var(--pulso-space-2) var(--pulso-space-4) var(--pulso-space-3);
+  color: var(--pulso-color-text-muted);
+  font-size: 0.75rem;
+}
