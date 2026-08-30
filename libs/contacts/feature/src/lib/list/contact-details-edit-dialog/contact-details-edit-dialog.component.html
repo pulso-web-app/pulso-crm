@@ -1,0 +1,225 @@
+<div class="dialog-shell">
+  <header class="dialog-header">
+    <pulso-crm-contact-avatar
+      class="dialog-header__avatar"
+      [contactId]="contactForm.id().value()"
+      [organizationName]="contactForm.organizationName().value()"
+    />
+
+    <div class="dialog-header__fields">
+      <h2 class="organization-name">
+        {{ contactForm.organizationName().value() }}
+      </h2>
+      <span class="contact-name">{{
+        contactForm.contactName().value() || 'Sem responsável'
+      }}</span>
+      <div class="chip-row">
+        <pulso-crm-contact-classification
+          [stage]="contactForm.stage().value()"
+          [status]="contactForm.status().value()"
+        />
+      </div>
+    </div>
+
+    <div class="dialog-header__actions">
+      @if (contactForm.instagramHandle().value()) {
+        <button
+          mat-icon-button
+          class="social-btn social-btn--instagram"
+          (click)="openInstagram()"
+          matTooltip="Abrir Instagram"
+          type="button"
+        >
+          <mat-icon>camera_alt</mat-icon>
+        </button>
+      }
+      @if (contactForm.whatsappNumber().value()) {
+        <button
+          mat-icon-button
+          class="social-btn social-btn--whatsapp"
+          (click)="openWhatsApp()"
+          matTooltip="Abrir WhatsApp"
+          type="button"
+        >
+          <mat-icon>chat</mat-icon>
+        </button>
+      }
+    </div>
+  </header>
+
+  <mat-divider />
+
+  <mat-dialog-content class="dialog-body">
+    <div class="dialog-body__columns">
+      <section class="column column--details">
+        <h3 class="section-title">Dados do contato</h3>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Organização</mat-label>
+          <input
+            matInput
+            type="text"
+            [formField]="contactForm.organizationName"
+          />
+          @if (contactForm.organizationName().errors()[0]; as error) {
+            <mat-error>{{ error.message }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Responsável</mat-label>
+          <input matInput type="text" [formField]="contactForm.contactName" />
+        </mat-form-field>
+
+        <div class="field-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Estágio</mat-label>
+            <mat-select [formField]="contactForm.stage">
+              @for (option of stageOptions; track option.value) {
+                <mat-option [value]="option.value">{{
+                  option.label
+                }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Status</mat-label>
+            <mat-select [formField]="contactForm.status">
+              @for (option of statusOptions; track option.value) {
+                <mat-option [value]="option.value">{{
+                  option.label
+                }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="info-badge">
+          <mat-icon class="info-badge__icon">schedule</mat-icon>
+          <span
+            >Último contato: <strong>{{ lastContactLabel() }}</strong></span
+          >
+        </div>
+      </section>
+
+      <section class="column column--channels">
+        <h3 class="section-title">Canais de contato</h3>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Instagram</mat-label>
+          <input
+            matInput
+            type="text"
+            [formField]="contactForm.instagramHandle"
+            placeholder="@usuario"
+          />
+          <mat-icon matPrefix class="channel-icon channel-icon--instagram">
+            camera_alt
+          </mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Link do perfil</mat-label>
+          <input
+            matInput
+            type="url"
+            [formField]="contactForm.instagramProfileUrl"
+            placeholder="https://instagram.com/..."
+          />
+          <mat-icon matPrefix>link</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>WhatsApp</mat-label>
+          <input
+            matInput
+            type="tel"
+            [formField]="contactForm.whatsappNumber"
+            placeholder="(00) 00000-0000"
+          />
+          <mat-icon matPrefix class="channel-icon channel-icon--whatsapp">
+            chat
+          </mat-icon>
+        </mat-form-field>
+      </section>
+    </div>
+
+    <mat-divider />
+
+    <section class="activities-section">
+      <div class="activities-header">
+        <h3 class="section-title">Atividades</h3>
+        <button
+          mat-icon-button
+          class="add-activity-btn"
+          (click)="toggleNewActivityForm()"
+          matTooltip="Nova atividade"
+          type="button"
+        >
+          <mat-icon>{{ showNewActivityForm() ? 'close' : 'add' }}</mat-icon>
+        </button>
+      </div>
+
+      @if (showNewActivityForm()) {
+        <div class="new-activity-form">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descrição da atividade</mat-label>
+            <textarea
+              matInput
+              rows="2"
+              [ngModel]="newActivityText()"
+              (ngModelChange)="newActivityText.set($event)"
+              placeholder="Ex: Ligou para alinhar reunião..."
+            ></textarea>
+          </mat-form-field>
+          <button
+            mat-flat-button
+            color="primary"
+            (click)="addActivity()"
+            [disabled]="!newActivityText().trim()"
+            type="button"
+          >
+            Adicionar
+          </button>
+        </div>
+      }
+
+      <div class="activities-list">
+        @if (contactForm.activities().value().length === 0) {
+          <div class="empty-activities">
+            <mat-icon>info</mat-icon>
+            <span>Nenhuma atividade registrada.</span>
+          </div>
+        }
+        @for (activity of contactForm.activities().value(); track $index) {
+          <div class="activity-item">
+            <div class="activity-item__dot" aria-hidden="true"></div>
+            <div class="activity-item__content">
+              <span class="activity-item__text">{{ activity.text }}</span>
+              <span class="activity-item__date">
+                {{ formatDateTime(activity.createdAt) }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  </mat-dialog-content>
+
+  <mat-divider />
+
+  <mat-dialog-actions align="end" class="dialog-footer">
+    <button mat-stroked-button type="button" (click)="close()">Cancelar</button>
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="save()"
+      [disabled]="contactForm().invalid()"
+    >
+      <mat-icon>check</mat-icon>
+      Salvar
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -1,15 +1,35 @@
 import { Contact } from './contact.models';
 
-export const MOCK_CONTACTS: readonly Contact[] = [
+type ContactMockData = Omit<Contact, 'activities'> & {
+  readonly activityTexts: readonly string[];
+};
+
+function createContactMock({
+  activityTexts,
+  ...contact
+}: ContactMockData): Contact {
+  return {
+    ...contact,
+    activities: activityTexts.map((text) => ({
+      text,
+      createdAt: contact.lastContactAt,
+      updatedAt: contact.lastContactAt,
+    })),
+  };
+}
+
+const CONTACT_MOCK_DATA: readonly ContactMockData[] = [
   {
     id: 'acme-tecnologia',
     organizationName: 'ACME Tecnologia',
     contactName: 'Maria Silva',
     instagramHandle: '@acme.tecnologia',
+    instagramProfileUrl: 'https://www.instagram.com/acme.tecnologia',
     whatsappNumber: '(11) 91234-5678',
     stage: 'hot-lead',
     status: 'awaiting-response',
     lastContactAt: '2026-08-26T10:30:00-03:00',
+    activityTexts: ['Enviou proposta de serviço'],
   },
   {
     id: 'xpto-solucoes',
@@ -20,6 +40,7 @@ export const MOCK_CONTACTS: readonly Contact[] = [
     stage: 'warm-lead',
     status: 'contacted',
     lastContactAt: '2026-08-25T15:45:00-03:00',
+    activityTexts: ['Entrou em contato'],
   },
   {
     id: 'abc-servicos',
@@ -30,6 +51,7 @@ export const MOCK_CONTACTS: readonly Contact[] = [
     stage: 'cold-lead',
     status: 'new',
     lastContactAt: '2026-08-23T09:00:00-03:00',
+    activityTexts: ['Enviou informações sobre o serviço'],
   },
   {
     id: 'inova-tech',
@@ -40,6 +62,7 @@ export const MOCK_CONTACTS: readonly Contact[] = [
     stage: 'contact',
     status: 'contacted',
     lastContactAt: '2026-08-22T14:20:00-03:00',
+    activityTexts: ['Entrou em contato'],
   },
   {
     id: 'delta-sistemas',
@@ -50,6 +73,10 @@ export const MOCK_CONTACTS: readonly Contact[] = [
     stage: 'hot-lead',
     status: 'awaiting-response',
     lastContactAt: '2026-08-20T11:15:00-03:00',
+    activityTexts: [
+      'Enviou proposta de serviço',
+      'Atualizou informações do contato',
+    ],
   },
   {
     id: 'ramos-consultoria',
@@ -60,36 +87,37 @@ export const MOCK_CONTACTS: readonly Contact[] = [
     stage: 'warm-lead',
     status: 'contacted',
     lastContactAt: '2026-08-19T16:40:00-03:00',
+    activityTexts: ['Entrou em contato'],
   },
   {
     id: 'verde-paisagismo',
     organizationName: 'Verde Paisagismo',
-    contactName: null,
     instagramHandle: '@verde.paisagismo',
     whatsappNumber: '(41) 98888-7777',
     stage: 'cold-lead',
     status: 'new',
     lastContactAt: '2026-08-18T10:00:00-03:00',
+    activityTexts: ['Entrou em contato'],
   },
   {
     id: 'lumiere-marketing',
     organizationName: 'Lumiere Marketing',
-    contactName: null,
     instagramHandle: '@lumiere.mkt',
     whatsappNumber: '(11) 97777-6666',
     stage: 'no-response',
     status: 'awaiting-response',
     lastContactAt: '2026-08-17T12:10:00-03:00',
+    activityTexts: ['Enviou proposta de serviço'],
   },
   {
     id: 'nexus-business',
     organizationName: 'Nexus Business',
-    contactName: null,
     instagramHandle: '@nexus.business',
     whatsappNumber: '(21) 96666-5555',
     stage: 'not-interested',
     status: 'closed',
     lastContactAt: '2026-08-15T17:30:00-03:00',
+    activityTexts: ['Enviou proposta de serviço'],
   },
   {
     id: 'orbita-design',
@@ -100,6 +128,7 @@ export const MOCK_CONTACTS: readonly Contact[] = [
     stage: 'contact',
     status: 'new',
     lastContactAt: '2026-08-14T09:25:00-03:00',
+    activityTexts: ['Enviou proposta de serviço'],
   },
   {
     id: 'prisma-financas',
@@ -110,6 +139,7 @@ export const MOCK_CONTACTS: readonly Contact[] = [
     stage: 'client',
     status: 'contacted',
     lastContactAt: '2026-08-13T13:05:00-03:00',
+    activityTexts: ['Enviou proposta de serviço'],
   },
   {
     id: 'aurora-studio',
@@ -120,6 +150,7 @@ export const MOCK_CONTACTS: readonly Contact[] = [
     stage: 'client',
     status: 'contacted',
     lastContactAt: '2026-08-12T18:00:00-03:00',
+    activityTexts: ['Enviou proposta de serviço'],
   },
   {
     id: 'zenite-logistica',
@@ -129,6 +160,7 @@ export const MOCK_CONTACTS: readonly Contact[] = [
     stage: 'warm-lead',
     status: 'awaiting-response',
     lastContactAt: '2026-08-11T08:45:00-03:00',
+    activityTexts: ['Enviou proposta de serviço'],
   },
   {
     id: 'norte-contabilidade',
@@ -138,6 +170,7 @@ export const MOCK_CONTACTS: readonly Contact[] = [
     stage: 'cold-lead',
     status: 'new',
     lastContactAt: '2026-08-10T15:10:00-03:00',
+    activityTexts: ['Enviou proposta de serviço'],
   },
   {
     id: 'elo-educacao',
@@ -148,6 +181,7 @@ export const MOCK_CONTACTS: readonly Contact[] = [
     stage: 'hot-lead',
     status: 'contacted',
     lastContactAt: '2026-08-08T10:50:00-03:00',
+    activityTexts: ['Enviou proposta de serviço'],
   },
   {
     id: 'croma-arquitetura',
@@ -158,6 +192,7 @@ export const MOCK_CONTACTS: readonly Contact[] = [
     stage: 'contact',
     status: 'awaiting-response',
     lastContactAt: '2026-08-07T14:35:00-03:00',
+    activityTexts: ['Enviou proposta de serviço'],
   },
   {
     id: 'viva-saude',
@@ -167,6 +202,7 @@ export const MOCK_CONTACTS: readonly Contact[] = [
     stage: 'client',
     status: 'contacted',
     lastContactAt: '2026-08-05T11:30:00-03:00',
+    activityTexts: ['Enviou proposta de serviço'],
   },
   {
     id: 'atlas-engenharia',
@@ -177,5 +213,9 @@ export const MOCK_CONTACTS: readonly Contact[] = [
     stage: 'no-response',
     status: 'awaiting-response',
     lastContactAt: '2026-08-03T16:20:00-03:00',
+    activityTexts: ['Enviou proposta de serviço'],
   },
 ];
+
+export const MOCK_CONTACTS: readonly Contact[] =
+  CONTACT_MOCK_DATA.map(createContactMock);

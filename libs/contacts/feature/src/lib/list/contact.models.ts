@@ -13,15 +13,23 @@ export type ContactStatus =
   | 'awaiting-response'
   | 'closed';
 
+export interface ContactActivity {
+  readonly text: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
 export interface Contact {
   readonly id: string;
   readonly organizationName: string;
-  readonly contactName: string | null;
+  readonly contactName?: string;
   readonly instagramHandle?: string;
+  readonly instagramProfileUrl?: string;
   readonly whatsappNumber?: string;
   readonly stage: ContactStage;
   readonly status: ContactStatus;
   readonly lastContactAt: string;
+  readonly activities: readonly ContactActivity[];
 }
 
 export interface ContactFilter {

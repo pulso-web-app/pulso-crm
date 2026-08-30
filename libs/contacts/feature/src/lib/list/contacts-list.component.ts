@@ -124,6 +124,14 @@ export class ContactsListComponent {
     this.resetPagination();
   }
 
+  protected updateContact(updated: Contact): void {
+    this.contacts.update((contacts) =>
+      contacts.map((contact) =>
+        contact.id === updated.id ? updated : contact,
+      ),
+    );
+  }
+
   private resetPagination(): void {
     this.pageIndex.set(0);
   }

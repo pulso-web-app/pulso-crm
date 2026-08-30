@@ -1,13 +1,11 @@
-<mat-card appearance="outlined">
+<mat-card appearance="outlined" (click)="openDetailsDialog()">
   <mat-card-header>
-    <div
+    <pulso-crm-contact-avatar
       mat-card-avatar
       class="contact-avatar"
-      [attr.data-tone]="avatarTone()"
-      aria-hidden="true"
-    >
-      {{ initials() }}
-    </div>
+      [contactId]="contact().id"
+      [organizationName]="contact().organizationName"
+    />
 
     <mat-card-title>{{ contact().organizationName }}</mat-card-title>
     <mat-card-subtitle>{{
@@ -19,20 +17,17 @@
       class="contact-menu"
       aria-label="Ações para {{ contact().organizationName }}"
       [matMenuTriggerFor]="contactActions"
+      (click)="$event.stopPropagation()"
     >
       <mat-icon>more_vert</mat-icon>
     </button>
   </mat-card-header>
 
   <mat-card-content>
-    <mat-chip-set aria-label="Classificação do contato">
-      <mat-chip class="stage-chip" [highlighted]="true">
-        {{ stageLabel() }}
-      </mat-chip>
-      <mat-chip class="status-chip" [highlighted]="true">
-        {{ statusLabel() }}
-      </mat-chip>
-    </mat-chip-set>
+    <pulso-crm-contact-classification
+      [stage]="contact().stage"
+      [status]="contact().status"
+    />
 
     <div class="contact-channels">
       @if (contact().instagramHandle; as instagramHandle) {

@@ -23,7 +23,10 @@
   @if (visibleContacts().length) {
     <div class="contacts-grid">
       @for (contact of visibleContacts(); track contact.id) {
-        <pulso-crm-contact-card [contact]="contact" />
+        <pulso-crm-contact-card
+          [contact]="contact"
+          (contactUpdated)="updateContact($event)"
+        />
       }
     </div>
 

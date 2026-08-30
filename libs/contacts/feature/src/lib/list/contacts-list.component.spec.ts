@@ -3,6 +3,7 @@ import { By } from '@angular/platform-browser';
 import { MatPaginator } from '@angular/material/paginator';
 import { provideRouter } from '@angular/router';
 import { ContactsListComponent } from './contacts-list.component';
+import { ContactCardComponent } from './contact-card/contact-card.component';
 import { ContactFiltersComponent } from './contact-filters/contact-filters.component';
 
 describe('ContactsListComponent', () => {
@@ -99,5 +100,23 @@ describe('ContactsListComponent', () => {
     expect(cards).toHaveLength(9);
     expect(cards[0].textContent).toContain('Órbita Design');
     expect(cards[0].textContent).not.toContain('ACME Tecnologia');
+  });
+
+  it('replaces a contact when a card emits an update', () => {
+    const card = fixture.debugElement.query(By.directive(ContactCardComponent))
+      .componentInstance as ContactCardComponent;
+    const updated = {
+      ...card.contact(),
+      organizationName: 'ACME Atualizada',
+    };
+
+    card.contactUpdated.emit(updated);
+    fixture.detectChanges();
+
+    const firstCard = fixture.nativeElement.querySelector(
+      'pulso-crm-contact-card',
+    ) as HTMLElement;
+    expect(firstCard.textContent).toContain('ACME Atualizada');
+    expect(firstCard.textContent).not.toContain('ACME Tecnologia');
   });
 });

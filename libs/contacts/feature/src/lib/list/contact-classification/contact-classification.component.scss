@@ -1,0 +1,62 @@
+:host {
+  --contact-stage-background: var(--pulso-color-primary-container);
+  --contact-stage-color: var(--pulso-color-on-primary-container);
+  --contact-status-background: var(--pulso-color-default-container);
+  --contact-status-color: var(--pulso-color-on-default-container);
+
+  display: block;
+}
+
+:host([data-stage='cold-lead']) {
+  --contact-stage-background: #18375f;
+  --contact-stage-color: #9bc7ff;
+}
+
+:host([data-stage='warm-lead']) {
+  --contact-stage-background: #4a3d14;
+  --contact-stage-color: #ffe27b;
+}
+
+:host([data-stage='hot-lead']) {
+  --contact-stage-background: var(--pulso-color-error-container);
+  --contact-stage-color: var(--pulso-color-on-error-container);
+}
+
+:host([data-stage='client']) {
+  --contact-stage-background: var(--pulso-color-success-container);
+  --contact-stage-color: var(--pulso-color-on-success-container);
+}
+
+:host([data-stage='not-interested']) {
+  --contact-stage-background: #4c252b;
+  --contact-stage-color: #ff9aa7;
+}
+
+:host([data-status='contacted']) {
+  --contact-status-background: #1b335d;
+  --contact-status-color: #9ec4ff;
+}
+
+:host([data-status='awaiting-response']) {
+  --contact-status-background: var(--pulso-color-primary-container);
+  --contact-status-color: var(--pulso-color-on-primary-container);
+}
+
+mat-chip-set {
+  min-height: 2rem;
+}
+
+.stage-chip,
+.status-chip {
+  --mdc-chip-label-text-size: 0.75rem;
+}
+
+.stage-chip {
+  --mdc-chip-elevated-container-color: var(--contact-stage-background);
+  --mdc-chip-label-text-color: var(--contact-stage-color);
+}
+
+.status-chip {
+  --mdc-chip-elevated-container-color: var(--contact-status-background);
+  --mdc-chip-label-text-color: var(--contact-status-color);
+}

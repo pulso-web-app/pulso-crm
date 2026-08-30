@@ -16,7 +16,8 @@
     "strict": false,
     "paths": {
       "@pulso-crm/contacts-feature": ["./libs/contacts/feature/src/index.ts"],
-      "@pulso-crm/shared-ui": ["./libs/shared/ui/src/index.ts"]
+      "@pulso-crm/shared-ui": ["./libs/shared/ui/src/index.ts"],
+      "@pulso-crm/shared-util": ["./libs/shared/util/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

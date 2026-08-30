@@ -1,35 +1,25 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, DestroyRef, inject, input, output } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterLink } from '@angular/router';
-import {
-  Contact,
-  contactStageLabel,
-  contactStatusLabel,
-} from '../contact.models';
-
-type AvatarTone = 'violet' | 'blue' | 'green' | 'orange' | 'pink' | 'cyan';
-
-const AVATAR_TONES: readonly AvatarTone[] = [
-  'violet',
-  'blue',
-  'green',
-  'orange',
-  'pink',
-  'cyan',
-];
+import { ContactAvatarComponent } from '../contact-avatar/contact-avatar.component';
+import { ContactClassificationComponent } from '../contact-classification/contact-classification.component';
+import { ContactDetailsEditDialogComponent } from '../contact-details-edit-dialog/contact-details-edit-dialog.component';
+import { Contact } from '../contact.models';
 
 @Component({
   selector: 'pulso-crm-contact-card',
   imports: [
+    ContactAvatarComponent,
+    ContactClassificationComponent,
     MatButtonModule,
     MatCardModule,
-    MatChipsModule,
     MatDividerModule,
     MatIconModule,
     MatMenuModule,
@@ -38,42 +28,14 @@ const AVATAR_TONES: readonly AvatarTone[] = [
   providers: [DatePipe],
   templateUrl: './contact-card.component.html',
   styleUrl: './contact-card.component.scss',
-  host: {
-    '[attr.data-stage]': 'contact().stage',
-    '[attr.data-status]': 'contact().status',
-  },
 })
 export class ContactCardComponent {
   private readonly datePipe = inject(DatePipe);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly dialog = inject(MatDialog);
 
   readonly contact = input.required<Contact>();
-
-  protected readonly initials = computed(() =>
-    this.contact()
-      .organizationName.split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part[0])
-      .join('')
-      .toUpperCase(),
-  );
-
-  protected readonly avatarTone = computed<AvatarTone>(() => {
-    const hash = [...this.contact().id].reduce(
-      (total, character) => total + character.charCodeAt(0),
-      0,
-    );
-
-    return AVATAR_TONES[hash % AVATAR_TONES.length];
-  });
-
-  protected readonly stageLabel = computed(() =>
-    contactStageLabel(this.contact().stage),
-  );
-
-  protected readonly statusLabel = computed(() =>
-    contactStatusLabel(this.contact().status),
-  );
+  readonly contactUpdated = output<Contact>();
 
   protected lastContactLabel(): string {
     const contactDate = this.startOfDay(new Date(this.contact().lastContactAt));
@@ -95,5 +57,27 @@ export class ContactCardComponent {
 
   private startOfDay(date: Date): Date {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
+  protected openDetailsDialog(): void {
+    const dialogRef = this.dialog.open(ContactDetailsEditDialogComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      data: {
+        contact: this.contact(),
+      },
+    });
+
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((updated?: Contact) => {
+        if (!updated) {
+          return;
+        }
+
+        this.contactUpdated.emit(updated);
+      });
   }
 }

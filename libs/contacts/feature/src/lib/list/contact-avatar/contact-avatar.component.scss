@@ -1,0 +1,37 @@
+:host {
+  --contact-avatar-size: 2.5rem;
+  --contact-avatar-radius: 50%;
+  --contact-avatar-font-size: 0.875rem;
+
+  display: grid;
+  flex: 0 0 var(--contact-avatar-size);
+  width: var(--contact-avatar-size);
+  height: var(--contact-avatar-size);
+  place-items: center;
+  border-radius: var(--contact-avatar-radius);
+  color: #11141b;
+  background: #b9a6ff;
+  font-size: var(--contact-avatar-font-size);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+:host([data-tone='blue']) {
+  background: #9bbdff;
+}
+
+:host([data-tone='green']) {
+  background: #91d1aa;
+}
+
+:host([data-tone='orange']) {
+  background: #ffb49f;
+}
+
+:host([data-tone='pink']) {
+  background: #f299d0;
+}
+
+:host([data-tone='cyan']) {
+  background: #8ed7da;
+}

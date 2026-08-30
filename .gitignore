@@ -52,3 +52,5 @@ __screenshots__/
 .firebase/
 firebase-debug.log
 firebase-debug.*.log
+
+vitest.config.*.timestamp*
