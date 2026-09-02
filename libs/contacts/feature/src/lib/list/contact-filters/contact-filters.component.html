@@ -1,6 +1,6 @@
 <div class="filters-left">
   <mat-form-field appearance="outline" subscriptSizing="dynamic">
-    <mat-label>Buscar Contatos</mat-label>
+    <mat-label>Início do nome da empresa</mat-label>
     <mat-icon matPrefix>search</mat-icon>
     <input matInput type="text" [(ngModel)]="searchContact" />
     @if (searchContact()) {
@@ -66,11 +66,6 @@
     }
   </mat-form-field>
 
-  <button mat-stroked-button>
-    <mat-icon>filter_list</mat-icon>
-    Mais filtros
-  </button>
-
   @if (hasActiveFilters()) {
     <button mat-button color="primary" (click)="clearAllFilters()">
       <mat-icon>filter_alt_off</mat-icon>
@@ -80,11 +75,6 @@
 </div>
 
 <div class="filters-right">
-  <button mat-stroked-button color="primary">
-    <mat-icon>file_upload</mat-icon>
-    Importar
-  </button>
-
   <a mat-flat-button color="primary" routerLink="new">
     <mat-icon>add</mat-icon>
     Novo contato

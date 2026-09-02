@@ -10,8 +10,11 @@ import { MatMenuModule } from '@angular/material/menu';
 import { RouterLink } from '@angular/router';
 import { ContactAvatarComponent } from '../contact-avatar/contact-avatar.component';
 import { ContactClassificationComponent } from '../contact-classification/contact-classification.component';
-import { ContactDetailsEditDialogComponent } from '../contact-details-edit-dialog/contact-details-edit-dialog.component';
-import { Contact } from '../contact.models';
+import {
+  ContactDetailsEditDialogComponent,
+  ContactDetailsEditDialogData,
+} from '../contact-details-edit-dialog/contact-details-edit-dialog.component';
+import { Contact } from '@pulso-crm/contacts-data-access';
 
 @Component({
   selector: 'pulso-crm-contact-card',
@@ -60,7 +63,11 @@ export class ContactCardComponent {
   }
 
   protected openDetailsDialog(): void {
-    const dialogRef = this.dialog.open(ContactDetailsEditDialogComponent, {
+    const dialogRef = this.dialog.open<
+      ContactDetailsEditDialogComponent,
+      ContactDetailsEditDialogData,
+      Contact
+    >(ContactDetailsEditDialogComponent, {
       width: '900px',
       maxWidth: '95vw',
       maxHeight: '90vh',

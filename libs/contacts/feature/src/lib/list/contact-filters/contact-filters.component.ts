@@ -11,7 +11,7 @@ import {
   CONTACT_STATUS_OPTIONS,
   ContactStage,
   ContactStatus,
-} from '../contact.models';
+} from '@pulso-crm/contacts-data-access';
 
 @Component({
   selector: 'pulso-crm-contact-filters',

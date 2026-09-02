@@ -6,12 +6,12 @@ Pulso CRM is the customer-relationship remote for the Pulso web application. It 
 
 The repository currently implements the contacts navigation and visual foundations:
 
-- Contacts list route with search and summary presentation.
+- Firestore-backed contacts list with organization-name prefix search, stage/status filters, aggregate metrics, and cursor pagination.
 - New-contact route and form shell.
 - Contact details and edit route shells.
-- A feature-first `contacts-feature` Nx project and CRM-local `shared-ui` project.
+- Feature-first `contacts-feature` and `contacts-data-access` Nx projects and CRM-local shared libraries.
 
-The current screens are an evolving product surface. Durable contact persistence and a complete backend integration are not yet implemented, so contributors must not treat display data or UI scaffolding as production data behavior.
+The directory reads the shared Firestore contacts for every authenticated user. Clicking a card opens the existing editing dialog, prefilled with the selected contact and its activity history. The form and draft interactions are preserved; create, update, and interaction persistence remain unimplemented. See [the Firestore guide](docs/firestore-contacts.md) for the data contract, index preparation, and explicit synthetic seed command.
 
 ## Federation contract
 
@@ -72,6 +72,7 @@ From the multi-root workspace, use **Pulso: Create Feature Here** for a contacts
 Contacts code is grouped by capability first:
 
 - `contacts-feature` owns the current list, create, detail, edit, and route composition.
+- `contacts-data-access` owns contact contracts, document validation, and shared Firestore reads.
 - `shared-ui` contains only CRM-local, domain-neutral presentation.
 - `crm` is the thin bootstrap and Native Federation adapter.
 
@@ -89,6 +90,10 @@ New data behavior should define and test relevant loading, empty, success, valid
 
 Use OpenSpec for meaningful changes: explore, propose, obtain human review, apply, strictly validate, run repository checks, and archive. Cross-repository changes share one kebab-case ID with the tooling umbrella and other affected apps.
 
+## Shared data
+
+All signed-in users see the same contacts in the root Firestore collection. Interactions and projects follow the same shared contract; personal account profiles remain private. See [the directory and migration guide](docs/firestore-contacts.md).
+
 ## CI and deployment
 
 The Firebase workflows validate documentation and OpenSpec before lint, unit tests, and the production build. Pull requests use a Hosting preview channel, and the main branch targets the configured live CRM site.
@@ -100,7 +105,8 @@ Deployment, hosting target, CI secret, and environment changes require explicit 
 - **The host cannot load CRM:** verify port 4201, `remoteEntry.json`, the `crm` name, and the `./Routes` exposure.
 - **Nx is unavailable:** run `npm ci` locally; do not rely on a global Nx installation.
 - **Playwright has no browser:** run `npm exec playwright install`.
-- **A contact action appears to save but does not persist:** confirm whether an approved data-access implementation exists; the current UI is not a complete backend.
+- **The directory requests sign-in:** authenticate through Pulso Shell; standalone CRM has no separate login form.
+- **Filtered reads fail:** verify that the documented contacts indexes are ready and the current user owns the collection.
 - **Nx Console targets another repository:** use the `Pulso:` multi-root tasks for normal workflows.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/architecture.md](docs/architecture.md).

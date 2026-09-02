@@ -21,10 +21,10 @@ import {
   Contact,
   CONTACT_STAGE_OPTIONS,
   CONTACT_STATUS_OPTIONS,
-} from '../contact.models';
+} from '@pulso-crm/contacts-data-access';
 
-interface DialogData {
-  contact: Contact;
+export interface ContactDetailsEditDialogData {
+  readonly contact: Contact;
 }
 
 type ContactEditForm = {
@@ -52,8 +52,10 @@ type ContactEditForm = {
   styleUrl: './contact-details-edit-dialog.component.scss',
 })
 export class ContactDetailsEditDialogComponent {
-  readonly dialogRef = inject(MatDialogRef<ContactDetailsEditDialogComponent>);
-  readonly data = inject<DialogData>(MAT_DIALOG_DATA);
+  readonly dialogRef = inject(
+    MatDialogRef<ContactDetailsEditDialogComponent, Contact>,
+  );
+  readonly data = inject<ContactDetailsEditDialogData>(MAT_DIALOG_DATA);
 
   readonly stageOptions = CONTACT_STAGE_OPTIONS;
   readonly statusOptions = CONTACT_STATUS_OPTIONS;
@@ -68,7 +70,9 @@ export class ContactDetailsEditDialogComponent {
     instagramProfileUrl: this.data.contact.instagramProfileUrl ?? '',
     whatsappNumber: this.data.contact.whatsappNumber ?? '',
     lastContactAt: this.data.contact.lastContactAt,
-    activities: [...this.data.contact.activities],
+    activities: this.data.contact.activities.map((activity) => ({
+      ...activity,
+    })),
   });
 
   readonly contactForm = form(this.contactFormModel, (schemaPath) => {

@@ -1,0 +1,10 @@
+{
+  "name": "@pulso-crm/contacts-data-access",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@angular/core": "^22.1.0",
+    "firebase": "^12.16.0",
+    "rxjs": "^7.8.0"
+  },
+  "sideEffects": false
+}

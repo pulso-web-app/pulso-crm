@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { vi } from 'vitest';
-import { Contact } from '../contact.models';
+import { Contact } from '@pulso-crm/contacts-data-access';
 import { ContactDetailsEditDialogComponent } from './contact-details-edit-dialog.component';
 
 const CONTACT: Contact = {
@@ -153,8 +153,14 @@ describe('ContactDetailsEditDialogComponent', () => {
   });
 
   it('closes without a value when editing is cancelled', () => {
+    component.contactForm.contactName().value.set('Rascunho do responsável');
+    component.newActivityText.set('Atividade cancelada');
+    component.addActivity();
     component.close();
 
     expect(dialogRef.close).toHaveBeenCalledWith();
+    expect(CONTACT.contactName).toBe('Maria Silva');
+    expect(CONTACT.activities).toHaveLength(1);
+    expect(CONTACT.activities[0].text).toBe('Enviou proposta de serviço');
   });
 });

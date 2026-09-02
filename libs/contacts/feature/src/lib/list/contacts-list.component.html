@@ -1,55 +1,83 @@
-<section class="contacts-page">
-  <pulso-crm-contact-metric-cards />
+<section class="contacts-page" [attr.aria-busy]="store.state() === 'loading'">
+  @if (store.summary(); as summary) {
+    <pulso-crm-contact-metric-cards [summary]="summary" />
+  }
   <pulso-crm-contact-filters
-    [searchContact]="searchQuery()"
-    [selectedStage]="selectedStage()"
-    [selectedStatus]="selectedStatus()"
-    (searchContactChange)="updateSearch($event)"
-    (selectedStageChange)="updateStage($event)"
-    (selectedStatusChange)="updateStatus($event)"
+    [searchContact]="store.filter().search"
+    [selectedStage]="store.filter().stage"
+    [selectedStatus]="store.filter().status"
+    (searchContactChange)="store.search($event)"
+    (selectedStageChange)="store.stage($event)"
+    (selectedStatusChange)="store.status($event)"
   />
-
-  <div class="results-summary" aria-live="polite">
-    <span>
-      {{ filteredContacts().length }}
-      {{
-        filteredContacts().length === 1
-          ? 'contato encontrado'
-          : 'contatos encontrados'
-      }}
-    </span>
-  </div>
-
-  @if (visibleContacts().length) {
-    <div class="contacts-grid">
-      @for (contact of visibleContacts(); track contact.id) {
-        <pulso-crm-contact-card
-          [contact]="contact"
-          (contactUpdated)="updateContact($event)"
-        />
-      }
-    </div>
-
-    @if (filteredContacts().length > pageSize()) {
-      <mat-paginator
-        [length]="filteredContacts().length"
-        [pageIndex]="pageIndex()"
-        [pageSize]="pageSize()"
-        [pageSizeOptions]="[9, 18, 27]"
-        [showFirstLastButtons]="true"
-        (page)="handlePageChange($event)"
-        aria-label="Paginação de contatos"
-      />
+  @switch (store.state()) {
+    @case ('loading') {
+      <section class="empty-state" role="status">
+        <mat-spinner diameter="36" aria-label="Carregando contatos" />
+        <p>Carregando contatos…</p>
+      </section>
     }
-  } @else {
-    <section class="empty-state" aria-labelledby="empty-state-title">
-      <mat-icon aria-hidden="true">person_search</mat-icon>
-      <h2 id="empty-state-title">Nenhum contato encontrado</h2>
-      <p>Tente ajustar a busca ou remover os filtros aplicados.</p>
-      <button mat-stroked-button (click)="clearFilters()">
-        <mat-icon>filter_alt_off</mat-icon>
-        Limpar filtros
-      </button>
-    </section>
+    @case ('signed-out') {
+      <section class="empty-state" role="status">
+        <mat-icon aria-hidden="true">lock</mat-icon>
+        <h2>Entre na sua conta para ver os contatos</h2>
+        <p>Acesse o Pulso e faça login para abrir o CRM.</p>
+      </section>
+    }
+    @case ('error') {
+      <section class="empty-state" role="alert">
+        <mat-icon aria-hidden="true">cloud_off</mat-icon>
+        <h2>Não foi possível carregar os contatos</h2>
+        <p>Verifique sua conexão e tente novamente.</p>
+        <button mat-stroked-button (click)="store.retry()">
+          Tentar novamente
+        </button>
+      </section>
+    }
+    @case ('success') {
+      <div class="results-summary" aria-live="polite">
+        <span
+          >{{ store.total() }}
+          {{
+            store.total() === 1 ? 'contato encontrado' : 'contatos encontrados'
+          }}</span
+        >
+      </div>
+      @if (store.page().contacts.length) {
+        <div class="contacts-grid">
+          @for (contact of store.page().contacts; track contact.id) {
+            <pulso-crm-contact-card [contact]="contact" />
+          }
+        </div>
+        @if (store.total() > 9) {
+          <mat-paginator
+            [length]="store.total()"
+            [pageIndex]="store.pageIndex()"
+            [pageSize]="store.pageSize()"
+            [pageSizeOptions]="[9, 18, 27]"
+            [showFirstLastButtons]="true"
+            (page)="store.changePage($event.pageIndex, $event.pageSize)"
+            aria-label="Paginação de contatos"
+          />
+        }
+      } @else {
+        <section class="empty-state" aria-labelledby="empty-state-title">
+          <mat-icon aria-hidden="true">person_search</mat-icon>
+          <h2 id="empty-state-title">Nenhum contato encontrado</h2>
+          @if (
+            store.filter().search ||
+            store.filter().stage ||
+            store.filter().status
+          ) {
+            <p>Tente ajustar a busca ou remover os filtros aplicados.</p>
+            <button mat-stroked-button (click)="store.clearFilters()">
+              <mat-icon>filter_alt_off</mat-icon> Limpar filtros
+            </button>
+          } @else {
+            <p>Ainda não há contatos cadastrados.</p>
+          }
+        </section>
+      }
+    }
   }
 </section>

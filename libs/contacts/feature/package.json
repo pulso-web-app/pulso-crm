@@ -7,6 +7,7 @@
     "@angular/forms": "^22.1.0",
     "@angular/material": "^22.1.0",
     "@angular/router": "^22.1.0",
+    "@pulso-crm/contacts-data-access": "0.0.1",
     "@pulso-crm/shared-util": "0.0.1"
   },
   "sideEffects": false

@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { provideRouter } from '@angular/router';
 import { Subject } from 'rxjs';
 import { vi } from 'vitest';
-import { Contact } from '../contact.models';
+import { Contact } from '@pulso-crm/contacts-data-access';
 import { ContactDetailsEditDialogComponent } from '../contact-details-edit-dialog/contact-details-edit-dialog.component';
 import { ContactCardComponent } from './contact-card.component';
 

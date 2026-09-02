@@ -23,6 +23,15 @@ export default withNativeFederation({
       },
       {
         overrides: {
+          // Firebase services can come from different remotes. Keep their
+          // component registry shared instead of embedding it in each bundle.
+          '@firebase/app': {
+            singleton: true,
+            strictVersion: true,
+            requiredVersion: 'auto',
+            build: 'package',
+            includeSecondaries: { keepAll: true },
+          },
           '@angular/core': {
             singleton: true,
             strictVersion: true,

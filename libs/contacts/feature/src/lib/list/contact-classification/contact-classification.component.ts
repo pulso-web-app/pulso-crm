@@ -5,7 +5,7 @@ import {
   contactStageLabel,
   ContactStatus,
   contactStatusLabel,
-} from '../contact.models';
+} from '@pulso-crm/contacts-data-access';
 
 @Component({
   selector: 'pulso-crm-contact-classification',
