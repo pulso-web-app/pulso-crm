@@ -345,6 +345,26 @@ describe('ContactsListComponent', () => {
     expect(repository.summary).toHaveBeenCalledTimes(2);
   });
 
+  it('shows paginator with is-floating class when not at bottom', async () => {
+    await loaded();
+    const paginatorEl = host().querySelector('mat-paginator')! as HTMLElement;
+    expect(paginatorEl.classList.contains('is-floating')).toBeTruthy();
+  });
+
+  it('removes is-floating class when scrolled to bottom', async () => {
+    await loaded();
+    const sentinel = host().querySelector('.contacts-paginator-sentinel');
+    expect(sentinel).not.toBeNull();
+  });
+
+  it('adds back is-floating class when page size changes', async () => {
+    await loaded();
+    store.changePage(0, 27);
+    await settle();
+    const paginatorEl = host().querySelector('mat-paginator')! as HTMLElement;
+    expect(paginatorEl.classList.contains('is-floating')).toBeTruthy();
+  });
+
   it('shows an actual empty directory without a paginator', async () => {
     repository.summary.mockResolvedValue({ ...SUMMARY, total: 0 });
     repository.readPage.mockResolvedValue({

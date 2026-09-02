@@ -1,4 +1,13 @@
-import { Component, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  effect,
+  inject,
+  OnDestroy,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import {
@@ -52,6 +61,36 @@ function createPortuguesePaginatorIntl(): MatPaginatorIntl {
   templateUrl: './contacts-list.component.html',
   styleUrl: './contacts-list.component.scss',
 })
-export class ContactsListComponent {
+export class ContactsListComponent implements AfterViewInit, OnDestroy {
   protected readonly store = inject(ContactsListStore);
+  protected readonly bottomSentinel =
+    viewChild<ElementRef<HTMLElement>>('bottomSentinel');
+  protected readonly isAtBottom = signal(true);
+
+  private observer?: IntersectionObserver;
+
+  constructor() {
+    effect(() => {
+      this.store.pageSize();
+      this.isAtBottom.set(false);
+    });
+  }
+
+  ngAfterViewInit(): void {
+    const target = this.bottomSentinel()?.nativeElement;
+    if (!target || typeof IntersectionObserver === 'undefined') return;
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          this.isAtBottom.set(entry.isIntersecting);
+        }
+      },
+      { root: null, threshold: 0 },
+    );
+    this.observer.observe(target);
+  }
+
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
+  }
 }
