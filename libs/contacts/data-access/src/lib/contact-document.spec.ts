@@ -10,6 +10,11 @@ const document = {
 };
 
 describe('Contact document contract', () => {
+  it('accepts an explicitly unknown last-contact date', () => {
+    expect(
+      decodeContact('new', { ...document, lastContactAt: null }).lastContactAt,
+    ).toBeNull();
+  });
   it('normalizes accented names and surrounding whitespace', () => {
     expect(normalizeContactSearch('  ÓRBITA Design  ')).toBe('orbita design');
   });

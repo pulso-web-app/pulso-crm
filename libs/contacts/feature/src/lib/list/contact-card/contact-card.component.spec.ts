@@ -60,6 +60,17 @@ describe('ContactCardComponent', () => {
     expect(actionButton).not.toBeNull();
   });
 
+  it('renders an unknown last-contact date without inventing a date', () => {
+    fixture.componentRef.setInput('contact', {
+      ...CONTACT,
+      lastContactAt: null,
+    });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain(
+      'Sem contato registrado',
+    );
+  });
+
   it('opens the details dialog with the selected contact', () => {
     const card = fixture.nativeElement.querySelector('mat-card') as HTMLElement;
 
@@ -69,7 +80,7 @@ describe('ContactCardComponent', () => {
       ContactDetailsEditDialogComponent,
       expect.objectContaining({
         width: '900px',
-        data: { contact: CONTACT },
+        data: { mode: 'edit', contact: CONTACT },
       }),
     );
   });

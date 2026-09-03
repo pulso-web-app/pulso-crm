@@ -6,7 +6,7 @@ context: |
   Keep OpenSpec structural headings and SHALL/MUST keywords in English.
   Repository: pulso-crm, an Angular 22 / Nx 23 Native Federation remote served on port 4201.
   Responsibilities: contacts routes and UI across domain, data-access, features, form, and interactions boundaries.
-  Current maturity: the list reads shared root Firestore contacts with cursor pagination. Card dialogs persist edits with pending/success/failure feedback and reconcile confirmed results locally without extra reads. Create, detail, and edit routes remain UI scaffolds.
+  Current maturity: the directory supports shared-modal creation and editing with real Firestore writes and save feedback. Edits reconcile locally; creation updates cached totals and reloads one bounded page without aggregations. Unknown last-contact dates are null. Standalone create, detail, and edit route shells remain scaffolds.
   Federation contract: remote name crm exposing ./Routes to pulso-shell.
   Quality gate: npm run check; route-contract changes also require shell integration verification.
   Boundaries: do not invent backend behavior, import sibling source code, or expose customer data.

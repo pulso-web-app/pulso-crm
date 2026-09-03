@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { deleteApp, FirebaseApp, initializeApp } from 'firebase/app';
 import {
+  addDoc,
   collection,
   deleteField,
   documentId,
@@ -32,6 +33,7 @@ vi.mock('firebase/firestore', async (importOriginal) =>
       getDocsFromServer: vi.fn(),
       getCountFromServer: vi.fn(),
       updateDoc: vi.fn().mockResolvedValue(undefined),
+      addDoc: vi.fn(),
     },
   ),
 );
@@ -50,6 +52,7 @@ describe('ContactsRepository', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(addDoc).mockResolvedValue({ id: 'generated-contact' } as never);
     app = initializeApp(
       { projectId: 'unit-tests', apiKey: 'unit-test-key' },
       `test-${Math.random()}`,
@@ -119,6 +122,63 @@ describe('ContactsRepository', () => {
     },
   );
 
+  it('creates a clean shared document with generated identity and no invented last contact', async () => {
+    const created = await repository.createContact({
+      organizationName: '  Órbita  ',
+      stage: 'contact',
+      status: 'new',
+      lastContactAt: null,
+      activities: [],
+      instagramHandle: ' ',
+      contactName: '  Ana  ',
+    });
+    expect(addDoc).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ path: 'contacts' }),
+      {
+        organizationName: 'Órbita',
+        organizationNameSearch: 'orbita',
+        stage: 'contact',
+        status: 'new',
+        lastContactAt: null,
+        activities: [],
+        contactName: 'Ana',
+      },
+    );
+    expect(created).toEqual(
+      expect.objectContaining({
+        id: 'generated-contact',
+        organizationName: 'Órbita',
+        contactName: 'Ana',
+        lastContactAt: null,
+      }),
+    );
+    expect(created.instagramHandle).toBeUndefined();
+    expect(updateDoc).not.toHaveBeenCalled();
+  });
+
+  it('preserves entered activities when creating and propagates creation failures', async () => {
+    const activity = {
+      text: 'Requested a proposal',
+      createdAt: '2026-09-02T12:00:00Z',
+      updatedAt: '2026-09-02T12:00:00Z',
+    };
+    await repository.createContact({ ...contact, activities: [activity] });
+    expect(vi.mocked(addDoc).mock.calls[0][1]).toEqual(
+      expect.objectContaining({ activities: [activity] }),
+    );
+    vi.mocked(addDoc).mockRejectedValueOnce(new Error('permission-denied'));
+    await expect(repository.createContact(contact)).rejects.toThrow(
+      'permission-denied',
+    );
+  });
+
+  it('rejects invalid creation before writing', async () => {
+    await expect(
+      repository.createContact({ ...contact, organizationName: '  ' }),
+    ).rejects.toThrow();
+    expect(addDoc).not.toHaveBeenCalled();
+  });
+
   it('saves populated optional fields and activity history', async () => {
     const fields = {
       contactName: 'Ana',
@@ -128,8 +188,8 @@ describe('ContactsRepository', () => {
       activities: [
         {
           text: 'Proposal sent',
-          createdAt: contact.lastContactAt,
-          updatedAt: contact.lastContactAt,
+          createdAt: '2026-09-02T12:00:00Z',
+          updatedAt: '2026-09-02T12:00:00Z',
         },
       ],
     };

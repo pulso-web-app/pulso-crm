@@ -1,4 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { LastContactEditorComponent } from './last-contact-editor.component';
+import {
+  BrazilianPhoneMaskDirective,
+  formatBrazilianPhone,
+} from './brazilian-phone-mask.directive';
 import { FormsModule } from '@angular/forms';
 import { disabled, form, FormField, validate } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,22 +27,39 @@ import { ContactClassificationComponent } from '../contact-classification/contac
 import { ContactsRepository } from '@pulso-crm/contacts-data-access';
 import {
   Contact,
+  ContactInput,
   CONTACT_STAGE_OPTIONS,
   CONTACT_STATUS_OPTIONS,
-  normalizeContactSearch,
 } from '@pulso-crm/contacts-data-access';
 
-export interface ContactDetailsEditDialogData {
-  readonly contact: Contact;
-}
+export type ContactDetailsEditDialogData =
+  | { readonly mode: 'create'; readonly contact?: never }
+  | { readonly mode: 'edit'; readonly contact: Contact };
 
 type ContactEditForm = {
   -readonly [Key in keyof Contact]-?: NonNullable<Contact[Key]>;
 };
 
+function createFormModel(contact?: Contact): ContactEditForm {
+  return {
+    id: contact?.id ?? '',
+    organizationName: contact?.organizationName ?? '',
+    contactName: contact?.contactName ?? '',
+    stage: contact?.stage ?? 'contact',
+    status: contact?.status ?? 'new',
+    instagramHandle: contact?.instagramHandle ?? '',
+    instagramProfileUrl: contact?.instagramProfileUrl ?? '',
+    whatsappNumber: contact?.whatsappNumber ?? '',
+    lastContactAt: contact?.lastContactAt ?? '',
+    activities: contact?.activities.map((activity) => ({ ...activity })) ?? [],
+  };
+}
+
 @Component({
   selector: 'pulso-crm-contact-details-edit-dialog',
   imports: [
+    LastContactEditorComponent,
+    BrazilianPhoneMaskDirective,
     ContactAvatarComponent,
     ContactClassificationComponent,
     FormsModule,
@@ -61,6 +83,7 @@ export class ContactDetailsEditDialogComponent {
     MatDialogRef<ContactDetailsEditDialogComponent, Contact>,
   );
   readonly data = inject<ContactDetailsEditDialogData>(MAT_DIALOG_DATA);
+  readonly isCreating = this.data.mode === 'create';
   readonly repository = inject(ContactsRepository);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -69,24 +92,21 @@ export class ContactDetailsEditDialogComponent {
 
   readonly isSaving = signal(false);
   readonly saveError = signal<string | null>(null);
+  readonly lastContactInvalid = signal(false);
+  readonly formatPhone = formatBrazilianPhone;
 
-  readonly contactFormModel = signal<ContactEditForm>({
-    id: this.data.contact.id,
-    organizationName: this.data.contact.organizationName,
-    contactName: this.data.contact.contactName ?? '',
-    stage: this.data.contact.stage,
-    status: this.data.contact.status,
-    instagramHandle: this.data.contact.instagramHandle ?? '',
-    instagramProfileUrl: this.data.contact.instagramProfileUrl ?? '',
-    whatsappNumber: this.data.contact.whatsappNumber ?? '',
-    lastContactAt: this.data.contact.lastContactAt,
-    activities: this.data.contact.activities.map((activity) => ({
-      ...activity,
-    })),
-  });
+  readonly contactFormModel = signal(createFormModel(this.data.contact));
 
   readonly contactForm = form(this.contactFormModel, (schemaPath) => {
     disabled(schemaPath, () => this.isSaving());
+    validate(schemaPath.lastContactAt, () =>
+      this.lastContactInvalid()
+        ? {
+            kind: 'dateTime',
+            message: 'Confira a data e a hora do último contato.',
+          }
+        : null,
+    );
     validate(schemaPath.organizationName, ({ value }) =>
       value().trim()
         ? null
@@ -97,10 +117,6 @@ export class ContactDetailsEditDialogComponent {
   readonly showNewActivityForm = signal(false);
   readonly newActivityText = signal('');
 
-  protected readonly lastContactLabel = computed(() =>
-    this.formatDateTime(this.contactForm.lastContactAt().value()),
-  );
-
   openInstagram(): void {
     const url =
       this.contactForm.instagramProfileUrl().value() ||
@@ -109,7 +125,9 @@ export class ContactDetailsEditDialogComponent {
   }
 
   openWhatsApp(): void {
-    const number = this.contactForm.whatsappNumber().value().replace(/\D/g, '');
+    const number = formatBrazilianPhone(
+      this.contactForm.whatsappNumber().value(),
+    ).replace(/\D/g, '');
     window.open(`https://wa.me/55${number}`, '_blank');
   }
 
@@ -140,6 +158,7 @@ export class ContactDetailsEditDialogComponent {
   }
 
   protected formatDateTime(value: string): string {
+    if (!value) return 'Sem contato registrado';
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) {
       return value;
@@ -153,13 +172,19 @@ export class ContactDetailsEditDialogComponent {
 
   async save(): Promise<void> {
     if (this.isSaving() || this.contactForm().invalid()) return;
-    const updatedContact = this.buildUpdatedContact();
+    const input = this.buildContactInput();
+    let savedContact: Contact;
     const previousDisableClose = this.dialogRef.disableClose;
     this.saveError.set(null);
     this.isSaving.set(true);
     this.dialogRef.disableClose = true;
     try {
-      await this.repository.updateContact(updatedContact);
+      if (this.data.mode === 'create') {
+        savedContact = await this.repository.createContact(input);
+      } else {
+        savedContact = { ...input, id: this.data.contact.id };
+        await this.repository.updateContact(savedContact);
+      }
     } catch {
       this.saveError.set('Não foi possível salvar o contato. Tente novamente.');
       return;
@@ -167,10 +192,16 @@ export class ContactDetailsEditDialogComponent {
       this.isSaving.set(false);
       this.dialogRef.disableClose = previousDisableClose;
     }
-    this.dialogRef.close(updatedContact);
-    this.snackBar.open('Contato atualizado com sucesso.', 'Fechar', {
-      duration: 5000,
-    });
+    this.dialogRef.close(savedContact);
+    this.snackBar.open(
+      this.isCreating
+        ? 'Contato criado com sucesso.'
+        : 'Contato atualizado com sucesso.',
+      'Fechar',
+      {
+        duration: 5000,
+      },
+    );
   }
 
   close(): void {
@@ -178,12 +209,18 @@ export class ContactDetailsEditDialogComponent {
     this.dialogRef.close();
   }
 
-  private buildUpdatedContact(): Contact {
-    const organizationName = this.contactForm.organizationName().value();
+  private buildContactInput(): ContactInput {
+    const model = this.contactFormModel();
     return omitEmptyFields({
-      ...this.data.contact,
-      ...this.contactFormModel(),
-      organizationNameSearch: normalizeContactSearch(organizationName),
-    }) as Contact;
+      organizationName: model.organizationName,
+      contactName: model.contactName,
+      stage: model.stage,
+      status: model.status,
+      instagramHandle: model.instagramHandle,
+      instagramProfileUrl: model.instagramProfileUrl,
+      whatsappNumber: model.whatsappNumber,
+      lastContactAt: model.lastContactAt || null,
+      activities: model.activities,
+    });
   }
 }

@@ -21,6 +21,21 @@ describe('ContactFiltersComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('requests creation from a button without routing and respects its disabled state', () => {
+    let requests = 0;
+    component.createRequested.subscribe(() => requests++);
+    const button = fixture.nativeElement.querySelector(
+      '.filters-right button',
+    ) as HTMLButtonElement;
+    button.click();
+    expect(requests).toBe(1);
+    fixture.componentRef.setInput('createDisabled', true);
+    fixture.detectChanges();
+    button.click();
+    expect(requests).toBe(1);
+    expect(fixture.nativeElement.querySelector('.filters-right a')).toBeNull();
+  });
+
   it('should start with empty filter state', () => {
     expect(component.selectedStage()).toBeNull();
     expect(component.selectedStatus()).toBeNull();

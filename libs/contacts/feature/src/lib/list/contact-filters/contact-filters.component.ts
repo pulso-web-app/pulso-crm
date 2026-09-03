@@ -1,11 +1,10 @@
-import { Component, computed, model } from '@angular/core';
+import { Component, computed, input, model, output } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
-import { RouterLink } from '@angular/router';
 import {
   CONTACT_STAGE_OPTIONS,
   CONTACT_STATUS_OPTIONS,
@@ -22,12 +21,13 @@ import {
     MatButtonModule,
     MatIconModule,
     MatInputModule,
-    RouterLink,
   ],
   templateUrl: './contact-filters.component.html',
   styleUrl: './contact-filters.component.scss',
 })
 export class ContactFiltersComponent {
+  readonly createDisabled = input(false);
+  readonly createRequested = output<void>();
   readonly selectedStage = model<ContactStage | null>(null);
   readonly selectedStatus = model<ContactStatus | null>(null);
   readonly searchContact = model('');

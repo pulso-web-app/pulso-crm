@@ -83,11 +83,13 @@ mat-dialog-content.dialog-body {
 
 .dialog-body__columns {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .column {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -112,32 +114,16 @@ mat-dialog-content.dialog-body {
 
 .half-width {
   flex: 1;
+  min-width: 0;
+}
+
+pulso-crm-last-contact-editor {
+  grid-column: 1 / -1;
+  min-width: 0;
 }
 
 .chip-row {
   margin-top: 0.25rem;
-}
-
-.info-badge {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 0.8rem;
-  border-radius: 10px;
-  background: var(--pulso-color-primary-container, #f8f6fb);
-  border: 1px solid rgba(103, 80, 164, 0.1);
-  font-size: 0.82rem;
-  margin-bottom: 10px;
-
-  strong {
-    font-weight: 600;
-  }
-}
-
-.info-badge__icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
 }
 
 mat-divider {
@@ -251,5 +237,19 @@ mat-divider {
 
   .dialog-header__fields {
     min-width: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  mat-dialog-content.dialog-body {
+    padding: 1rem;
+  }
+
+  .field-row {
+    flex-direction: column;
+  }
+
+  .organization-name {
+    overflow-wrap: anywhere;
   }
 }

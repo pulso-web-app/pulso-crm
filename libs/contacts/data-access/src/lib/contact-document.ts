@@ -73,7 +73,8 @@ export function decodeContact(id: string, value: unknown): Contact {
     whatsappNumber: optionalText(data['whatsappNumber']),
     stage,
     status,
-    lastContactAt: date(data['lastContactAt']),
+    lastContactAt:
+      data['lastContactAt'] === null ? null : date(data['lastContactAt']),
     activities: activities.map((value): ContactActivity => {
       const activity = record(value);
       return {

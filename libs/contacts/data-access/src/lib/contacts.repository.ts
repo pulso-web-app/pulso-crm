@@ -2,6 +2,7 @@ import { inject, InjectionToken, Provider, Service } from '@angular/core';
 import { FirebaseApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import {
+  addDoc,
   collection,
   deleteField,
   documentId,
@@ -20,7 +21,12 @@ import {
   where,
 } from 'firebase/firestore';
 import { distinctUntilChanged, Observable, shareReplay } from 'rxjs';
-import { Contact, ContactFilter, ContactStage } from './contact.models';
+import {
+  Contact,
+  ContactFilter,
+  ContactInput,
+  ContactStage,
+} from './contact.models';
 import { decodeContact, normalizeContactSearch } from './contact-document';
 
 const CONTACTS_FIREBASE_APP = new InjectionToken<() => FirebaseApp>(
@@ -141,9 +147,46 @@ export class ContactsRepository {
     };
   }
 
+  async createContact(input: ContactInput): Promise<Contact> {
+    const organizationName = input.organizationName.trim();
+    if (!organizationName) throw new Error('Organization name is required.');
+    const optionalFields = Object.fromEntries(
+      Object.entries({
+        contactName: input.contactName,
+        instagramHandle: input.instagramHandle,
+        instagramProfileUrl: input.instagramProfileUrl,
+        whatsappNumber: input.whatsappNumber,
+      })
+        .map(([key, value]) => [key, value?.trim()])
+        .filter(([, value]) => Boolean(value)),
+    );
+    const document = {
+      organizationName,
+      organizationNameSearch: normalizeContactSearch(organizationName),
+      stage: input.stage,
+      status: input.status,
+      lastContactAt: input.lastContactAt,
+      activities: input.activities.map(({ text, createdAt, updatedAt }) => ({
+        text,
+        createdAt,
+        updatedAt,
+      })),
+      ...optionalFields,
+    };
+    // Validate the stored contract before issuing a write.
+    decodeContact('new-contact', document);
+    const reference = await addDoc(
+      collection(this.firestore, 'contacts'),
+      document,
+    );
+    return decodeContact(reference.id, document);
+  }
+
   async updateContact(contact: Contact): Promise<void> {
     const contactRef = doc(this.firestore, 'contacts', contact.id);
-    const organizationNameSearch = normalizeContactSearch(contact.organizationName);
+    const organizationNameSearch = normalizeContactSearch(
+      contact.organizationName,
+    );
     await updateDoc(contactRef, {
       organizationName: contact.organizationName,
       organizationNameSearch,

@@ -28,9 +28,11 @@ export interface Contact {
   readonly whatsappNumber?: string;
   readonly stage: ContactStage;
   readonly status: ContactStatus;
-  readonly lastContactAt: string;
+  readonly lastContactAt: string | null;
   readonly activities: readonly ContactActivity[];
 }
+
+export type ContactInput = Omit<Contact, 'id'>;
 
 export interface ContactFilter {
   readonly search: string;

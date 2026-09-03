@@ -1,13 +1,17 @@
 import {
   AfterViewInit,
   Component,
+  DestroyRef,
   ElementRef,
   effect,
   inject,
   OnDestroy,
   signal,
   viewChild,
+  ViewContainerRef,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ContactDialogService } from './contact-details-edit-dialog/contact-dialog.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import {
@@ -63,6 +67,10 @@ function createPortuguesePaginatorIntl(): MatPaginatorIntl {
 })
 export class ContactsListComponent implements AfterViewInit, OnDestroy {
   protected readonly store = inject(ContactsListStore);
+  private readonly dialog = inject(ContactDialogService);
+  private readonly viewContainerRef = inject(ViewContainerRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private createDialogOpen = false;
   protected readonly bottomSentinel =
     viewChild<ElementRef<HTMLElement>>('bottomSentinel');
   protected readonly isAtBottom = signal(true);
@@ -88,6 +96,19 @@ export class ContactsListComponent implements AfterViewInit, OnDestroy {
       { root: null, threshold: 0 },
     );
     this.observer.observe(target);
+  }
+
+  protected openNewContact(): void {
+    if (this.createDialogOpen || this.store.state() !== 'success') return;
+    this.createDialogOpen = true;
+    this.dialog
+      .open({ mode: 'create' }, this.viewContainerRef)
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((created) => {
+        this.createDialogOpen = false;
+        if (created) this.store.applyCreatedContact(created);
+      });
   }
 
   ngOnDestroy(): void {

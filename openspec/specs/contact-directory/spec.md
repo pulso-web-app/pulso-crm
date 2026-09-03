@@ -193,3 +193,122 @@ The directory SHALL replace the visible contact by ID only after confirmed persi
 
 - **WHEN** an update arrives after sign-out, during a new load, or for a contact absent from the current page
 - **THEN** it does not reinsert the contact or change the active directory state
+
+### Requirement: New contact dialog
+
+The CRM SHALL open the shared contact editing dialog in creation mode from New contact without navigating away from the directory or copying another contact's data.
+
+#### Scenario: open a fresh form
+
+- **WHEN** an authenticated user clicks New contact on a loaded directory, including an empty directory
+- **THEN** the shared modal opens with a New contact title, blank organization/person/channel fields, stage Contact, status New, no last-contact date and an empty activity list
+- **AND** no backend write occurs until a valid form is saved
+
+#### Scenario: invalid or cancelled draft
+
+- **WHEN** the organization name is empty or whitespace-only, or the user cancels before saving
+- **THEN** no contact is created, cancellation leaves the directory unchanged, and reopening starts a fresh draft
+
+#### Scenario: unavailable session or pending directory
+
+- **WHEN** the directory is signed out, loading, or failed
+- **THEN** the New contact action is disabled
+
+### Requirement: Persist new contacts
+
+The CRM SHALL create one shared contact with a generated document ID, trimmed editable fields, a normalized organization search name and the entered activity history. Empty optional strings SHALL be omitted and an unknown last-contact date SHALL be stored as null and displayed without inventing a contact event.
+
+#### Scenario: create successfully
+
+- **WHEN** the user saves a valid creation draft and the backend confirms success
+- **THEN** the modal closes with the persisted contact including its generated ID and displays a creation success message
+
+#### Scenario: pending creation or failed creation
+
+- **WHEN** a creation write is pending or fails
+- **THEN** the same spinner, disabled editing, duplicate-submit guard and Escape/backdrop/cancel protection as editing apply while pending
+- **AND** failure keeps the draft open with an accessible error and permits retry or cancellation without claiming success
+
+#### Scenario: read or edit a contact without a last-contact date
+
+- **WHEN** a contact with a null last-contact date is displayed or edited
+- **THEN** the card and dialog indicate no recorded contact date and preserve the null value when saving
+
+### Requirement: Directory reconciliation after creation
+
+The directory SHALL update known cached totals and stage metrics after confirmed creation and refresh only the first bounded page with the existing filters and page size, without requesting new aggregations. Edit saves SHALL retain their existing local-only reconciliation.
+
+#### Scenario: creation matches current filters
+
+- **WHEN** creation succeeds for a contact matching all current filters
+- **THEN** the matching total and global total increase by one, the relevant global stage metric increases, and one bounded first-page query applies server ordering
+
+#### Scenario: creation does not match current filters
+
+- **WHEN** creation succeeds for a contact outside the current filters
+- **THEN** global metrics reflect the new record, the filtered total is unchanged, and the refreshed page continues to honor those filters
+
+#### Scenario: follow-up page read fails
+
+- **WHEN** creation succeeds but the bounded page refresh fails
+- **THEN** the creation remains confirmed and the directory exposes its retryable read-error state without requesting another creation
+
+### Requirement: Editable last-contact date and time
+
+The shared creation and editing dialog SHALL accept optional last-contact date and time in local Brazilian DD/MM/YYYY and 24-hour HH:mm format, support keyboard entry and pickers, and persist the corresponding ISO instant or null when both are cleared.
+
+#### Scenario: enter or adjust an event
+
+- **WHEN** a user selects or types a valid date and time
+- **THEN** the badge reflects the local event and a successful save returns the corresponding instant through existing directory reconciliation
+- **AND** opening a persisted event displays its local date and time without modifying it until edited
+
+#### Scenario: record the current moment
+
+- **WHEN** the user clicks Agora beside the last-contact badge
+- **THEN** both fields and the badge use the machine's current date and time
+
+#### Scenario: invalid or incomplete event
+
+- **WHEN** either field is invalid or only one is filled
+- **THEN** feedback explains the required formats or missing field and saving issues no write
+
+#### Scenario: clear or save an event
+
+- **WHEN** both fields are cleared
+- **THEN** the unknown event is saved as null
+- **AND** while any write is pending the fields, pickers and Agora are disabled and failure preserves the draft
+
+### Requirement: Brazilian WhatsApp input mask
+
+The dialog SHALL format Brazilian phone input during typing and pasting with an area code and eight- or nine-digit subscriber number, preserve cursor editing, and allow clearing the optional number.
+
+#### Scenario: type or paste a phone
+
+- **WHEN** a user types a national number or pastes a Brazilian number prefixed with +55
+- **THEN** the input shows (DD) NNNN-NNNN or (DD) NNNNN-NNNN as appropriate and opening WhatsApp uses exactly one country code
+
+#### Scenario: change or clear a phone
+
+- **WHEN** the user edits within the number, deletes digits, or clears the field
+- **THEN** the mask follows the remaining digits and a cleared field remains optional
+
+### Requirement: Automatic last-contact input masks
+
+The shared dialog SHALL insert Brazilian date and time separators during numeric typing and paste, without requiring blur, while preserving strict validation and keyboard editing.
+
+#### Scenario: numeric date and time entry
+
+- **WHEN** a user types or pastes 12122012 and 1330 into the date and time fields
+- **THEN** the fields display 12/12/2012 and 13:30 and a successful save uses that local instant
+
+#### Scenario: edit or clear masked input
+
+- **WHEN** a user replaces selected digits, deletes near a separator, or clears a field
+- **THEN** the caret stays near the edit, separators follow the digits, and incomplete input prevents saving until corrected or both fields are cleared
+
+#### Scenario: invalid numeric input or picker selection
+
+- **WHEN** digits represent an impossible date or time, or contain too many digits
+- **THEN** the dialog rejects the value instead of silently converting it to a different valid event
+- **AND** selecting values through the pickers and using Agora or clear retain their existing behavior

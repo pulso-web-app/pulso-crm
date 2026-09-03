@@ -75,8 +75,14 @@
 </div>
 
 <div class="filters-right">
-  <a mat-flat-button color="primary" routerLink="new">
+  <button
+    mat-flat-button
+    color="primary"
+    type="button"
+    [disabled]="createDisabled()"
+    (click)="createRequested.emit()"
+  >
     <mat-icon>add</mat-icon>
     Novo contato
-  </a>
+  </button>
 </div>

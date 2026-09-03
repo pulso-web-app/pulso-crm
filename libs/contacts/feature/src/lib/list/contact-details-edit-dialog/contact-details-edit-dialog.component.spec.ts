@@ -40,7 +40,10 @@ describe('ContactDetailsEditDialogComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ContactDetailsEditDialogComponent],
       providers: [
-        { provide: MAT_DIALOG_DATA, useValue: { contact: CONTACT } },
+        {
+          provide: MAT_DIALOG_DATA,
+          useValue: { mode: 'edit', contact: CONTACT },
+        },
         { provide: MatDialogRef, useValue: dialogRef },
         { provide: ContactsRepository, useValue: repository },
         { provide: MatSnackBar, useValue: snackBar },
@@ -82,6 +85,30 @@ describe('ContactDetailsEditDialogComponent', () => {
     expect(saveButton.disabled).toBe(true);
     expect(fixture.nativeElement.textContent).toContain(
       'O nome da organização é obrigatório.',
+    );
+  });
+
+  it('blocks a partial last-contact draft and saves the completed local instant', async () => {
+    const inputs = fixture.nativeElement.querySelectorAll(
+      'pulso-crm-last-contact-editor input',
+    ) as NodeListOf<HTMLInputElement>;
+    inputs[1].value = '';
+    inputs[1].dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await component.save();
+    expect(repository.updateContact).not.toHaveBeenCalled();
+    inputs[0].value = '04032026';
+    inputs[0].dispatchEvent(new Event('input', { bubbles: true }));
+    inputs[1].value = '1845';
+    inputs[1].dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await component.save();
+    expect(repository.updateContact).toHaveBeenCalledWith(
+      expect.objectContaining({
+        lastContactAt: new Date(2026, 2, 4, 18, 45).toISOString(),
+      }),
     );
   });
 
@@ -171,6 +198,18 @@ describe('ContactDetailsEditDialogComponent', () => {
     expect(CONTACT.activities).toHaveLength(1);
     expect(CONTACT.activities[0].text).toBe('Enviou proposta de serviço');
     expect(repository.updateContact).not.toHaveBeenCalled();
+  });
+
+  it('preserves an unknown last-contact date when editing', async () => {
+    component.contactForm.lastContactAt().value.set('');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain(
+      'Sem contato registrado',
+    );
+    await component.save();
+    expect(repository.updateContact).toHaveBeenCalledWith(
+      expect.objectContaining({ id: CONTACT.id, lastContactAt: null }),
+    );
   });
 
   it.each(['', '   '])(

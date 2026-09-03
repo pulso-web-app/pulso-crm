@@ -61,6 +61,7 @@ describe('ContactsListComponent', () => {
     count: ReturnType<typeof vi.fn>;
     summary: ReturnType<typeof vi.fn>;
     updateContact: ReturnType<typeof vi.fn>;
+    createContact: ReturnType<typeof vi.fn>;
   };
   let initial: ReturnType<typeof deferred<ContactPage>>;
 
@@ -76,6 +77,7 @@ describe('ContactsListComponent', () => {
       count: vi.fn().mockResolvedValue(1),
       summary: vi.fn().mockResolvedValue(SUMMARY),
       updateContact: vi.fn().mockResolvedValue(undefined),
+      createContact: vi.fn(),
     };
     await TestBed.configureTestingModule({
       imports: [ContactsListComponent],
@@ -106,6 +108,246 @@ describe('ContactsListComponent', () => {
     return fixture.debugElement.query(By.directive(ContactFiltersComponent))
       .componentInstance;
   }
+
+  async function openCreation() {
+    (
+      host().querySelector('.filters-right button') as HTMLButtonElement
+    ).click();
+    await settle();
+    const ref = TestBed.inject(MatDialog).openDialogs[0];
+    return {
+      ref,
+      editor: ref.componentInstance as ContactDetailsEditDialogComponent,
+    };
+  }
+
+  it('opens a clean creation form and cancellation never writes or reuses the draft', async () => {
+    await loaded();
+    const { ref, editor } = await openCreation();
+    expect(editor.isCreating).toBe(true);
+    expect(editor.contactFormModel()).toEqual({
+      id: '',
+      organizationName: '',
+      contactName: '',
+      instagramHandle: '',
+      instagramProfileUrl: '',
+      whatsappNumber: '',
+      stage: 'contact',
+      status: 'new',
+      lastContactAt: '',
+      activities: [],
+    });
+    expect(document.getElementById(ref.id)?.textContent).toContain(
+      'Novo contato',
+    );
+    await editor.save();
+    editor.contactForm.organizationName().value.set('   ');
+    await editor.save();
+    editor.contactForm.organizationName().value.set('Cancelled draft');
+    const closed = firstValueFrom(ref.afterClosed());
+    editor.close();
+    await closed;
+    expect(repository.createContact).not.toHaveBeenCalled();
+    expect(repository.updateContact).not.toHaveBeenCalled();
+    expect(repository.readPage).toHaveBeenCalledTimes(1);
+    const reopened = await openCreation();
+    expect(reopened.editor.contactForm.organizationName().value()).toBe('');
+    const cancelled = firstValueFrom(reopened.ref.afterClosed());
+    reopened.editor.close();
+    await cancelled;
+  });
+
+  it('creates through the shared modal, protects pending save, and refreshes one bounded page without recounting', async () => {
+    await loaded();
+    const created: Contact = {
+      ...page('Created contact', 'generated-id').contacts[0],
+      stage: 'contact',
+      lastContactAt: null,
+    };
+    const pending = deferred<Contact>();
+    repository.createContact.mockReturnValueOnce(pending.promise);
+    repository.readPage.mockResolvedValueOnce({
+      ...page(created.organizationName, created.id),
+      contacts: [created],
+    });
+    const { ref, editor } = await openCreation();
+    editor.contactForm.organizationName().value.set('  Created contact  ');
+    const saved = editor.save();
+    await settle();
+    expect(ref.disableClose).toBe(true);
+    expect(
+      document.getElementById(ref.id)?.querySelector('mat-spinner'),
+    ).not.toBeNull();
+    document.querySelector<HTMLElement>('.cdk-overlay-backdrop')?.click();
+    document.querySelector<HTMLElement>('.cdk-overlay-pane')?.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'Escape',
+        code: 'Escape',
+        keyCode: 27,
+        bubbles: true,
+      }),
+    );
+    editor.close();
+    await editor.save();
+    expect(repository.createContact).toHaveBeenCalledExactlyOnceWith({
+      organizationName: 'Created contact',
+      stage: 'contact',
+      status: 'new',
+      lastContactAt: null,
+      activities: [],
+    });
+    expect(repository.readPage).toHaveBeenCalledTimes(1);
+    expect(TestBed.inject(MatDialog).openDialogs).toHaveLength(1);
+    const closed = firstValueFrom(ref.afterClosed());
+    pending.resolve(created);
+    await saved;
+    await closed;
+    await settle();
+    expect(host().textContent).toContain('Created contact');
+    expect(host().textContent).toContain('Sem contato registrado');
+    expect(document.body.textContent).toContain('Contato criado com sucesso.');
+    expect(repository.updateContact).not.toHaveBeenCalled();
+    expect(repository.readPage).toHaveBeenCalledTimes(2);
+    expect(repository.readPage).toHaveBeenLastCalledWith({
+      direction: 'first',
+      size: 9,
+      filter: { search: '', stage: null, status: null },
+    });
+    expect(repository.summary).toHaveBeenCalledTimes(1);
+    expect(repository.count).not.toHaveBeenCalled();
+    expect(store.total()).toBe(30);
+    expect(store.summary()?.total).toBe(30);
+  });
+
+  it('creates a contact with an entered last-contact instant and masked WhatsApp', async () => {
+    await loaded();
+    const { ref, editor } = await openCreation();
+    editor.contactForm.organizationName().value.set('Dated contact');
+    const dialog = document.getElementById(ref.id);
+    if (!dialog) throw new Error('The creation dialog was not rendered.');
+    const inputs = dialog.querySelectorAll(
+      'pulso-crm-last-contact-editor input',
+    ) as NodeListOf<HTMLInputElement>;
+    inputs[0].value = '02/09/2026';
+    inputs[0].dispatchEvent(new Event('input', { bubbles: true }));
+    inputs[1].value = '16:20';
+    inputs[1].dispatchEvent(new Event('input', { bubbles: true }));
+    const phone = dialog.querySelector('input[type="tel"]') as HTMLInputElement;
+    phone.value = '+55 11 91234 5678';
+    phone.dispatchEvent(new Event('input', { bubbles: true }));
+    await settle();
+    const lastContactAt = new Date(2026, 8, 2, 16, 20).toISOString();
+    repository.createContact.mockResolvedValueOnce({
+      ...editor.contactFormModel(),
+      id: 'created-dated',
+      lastContactAt,
+    });
+    await editor.save();
+    expect(repository.createContact).toHaveBeenCalledWith(
+      expect.objectContaining({
+        lastContactAt,
+        whatsappNumber: '(11) 91234-5678',
+      }),
+    );
+  });
+
+  it('retains a failed creation draft and can retry without updating an existing record', async () => {
+    await loaded();
+    repository.createContact
+      .mockRejectedValueOnce(new Error('permission-denied'))
+      .mockResolvedValueOnce({
+        ...page('Retry created', 'new-id').contacts[0],
+        lastContactAt: null,
+      });
+    const { ref, editor } = await openCreation();
+    editor.contactForm.organizationName().value.set('Retry created');
+    await editor.save();
+    await settle();
+    expect(ref.disableClose).toBe(false);
+    expect(editor.contactForm.organizationName().value()).toBe('Retry created');
+    expect(
+      document.getElementById(ref.id)?.querySelector('[role="alert"]'),
+    ).not.toBeNull();
+    expect(repository.readPage).toHaveBeenCalledTimes(1);
+    expect(store.total()).toBe(29);
+    const closed = firstValueFrom(ref.afterClosed());
+    await editor.save();
+    await closed;
+    await settle();
+    expect(repository.createContact).toHaveBeenCalledTimes(2);
+    expect(repository.updateContact).not.toHaveBeenCalled();
+  });
+
+  it('enables creation for a loaded empty directory but disables it while loading or signed out', async () => {
+    expect(
+      (host().querySelector('.filters-right button') as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+    repository.summary.mockResolvedValue({ ...SUMMARY, total: 0 });
+    repository.readPage.mockResolvedValue({
+      contacts: [],
+      first: null,
+      last: null,
+    });
+    store.retry();
+    await settle();
+    expect(
+      (host().querySelector('.filters-right button') as HTMLButtonElement)
+        .disabled,
+    ).toBe(false);
+    const { ref, editor } = await openCreation();
+    expect(editor.isCreating).toBe(true);
+    const closed = firstValueFrom(ref.afterClosed());
+    editor.close();
+    await closed;
+    user.next(null);
+    await settle();
+    expect(
+      (host().querySelector('.filters-right button') as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+  });
+
+  it.each([true, false])(
+    'reconciles a created contact matching current filters: %s',
+    async (matches) => {
+      await loaded();
+      store.filter.set({ search: 'Ór', stage: 'client', status: 'new' });
+      store.pageIndex.set(2);
+      store.applyCreatedContact({
+        ...page(matches ? 'Órbita New' : 'Outside', 'new-id').contacts[0],
+      });
+      await settle();
+      expect(store.total()).toBe(matches ? 30 : 29);
+      expect(store.summary()).toEqual({ ...SUMMARY, total: 30, client: 5 });
+      expect(store.pageIndex()).toBe(0);
+      expect(repository.readPage).toHaveBeenCalledTimes(2);
+      expect(repository.count).not.toHaveBeenCalled();
+      expect(repository.summary).toHaveBeenCalledTimes(1);
+      expect(repository.readPage).toHaveBeenLastCalledWith({
+        direction: 'first',
+        size: 9,
+        filter: { search: 'Ór', stage: 'client', status: 'new' },
+      });
+    },
+  );
+
+  it('reports a failed follow-up read without repeating the confirmed creation', async () => {
+    await loaded();
+    repository.createContact.mockResolvedValueOnce(
+      page('Saved', 'new-id').contacts[0],
+    );
+    repository.readPage.mockRejectedValueOnce(new Error('unavailable'));
+    const { ref, editor } = await openCreation();
+    editor.contactForm.organizationName().value.set('Saved');
+    const closed = firstValueFrom(ref.afterClosed());
+    await editor.save();
+    await closed;
+    await settle();
+    expect(store.state()).toBe('error');
+    expect(repository.createContact).toHaveBeenCalledTimes(1);
+    expect(TestBed.inject(MatDialog).openDialogs).toHaveLength(0);
+  });
 
   it('shows loading without inventing zero results', () => {
     expect(host().textContent).toContain('Carregando contatos');
@@ -212,6 +454,14 @@ describe('ContactsListComponent', () => {
       selected.instagramHandle,
       selected.instagramProfileUrl,
       selected.whatsappNumber,
+      new Intl.DateTimeFormat('pt-BR').format(
+        new Date(selected.lastContactAt ?? ''),
+      ),
+      new Intl.DateTimeFormat('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+      }).format(new Date(selected.lastContactAt ?? '')),
     ]);
     expect(dialogElement.textContent).toContain('Proposta enviada');
     expect(dialogElement.textContent).toContain('Lead Morno');

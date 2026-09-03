@@ -3,6 +3,8 @@
     <pulso-crm-contact-metric-cards [summary]="summary" />
   }
   <pulso-crm-contact-filters
+    [createDisabled]="store.state() !== 'success'"
+    (createRequested)="openNewContact()"
     [searchContact]="store.filter().search"
     [selectedStage]="store.filter().stage"
     [selectedStatus]="store.filter().status"

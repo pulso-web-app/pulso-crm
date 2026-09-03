@@ -107,6 +107,30 @@ export class ContactsListStore {
     });
   }
 
+  applyCreatedContact(created: Contact): void {
+    if (this.state() !== 'success' || !this.userId) return;
+    this.summary.update((summary) => {
+      if (!summary) return summary;
+      const next = { ...summary, total: summary.total + 1 };
+      if (created.stage !== 'contact') next[created.stage]++;
+      return next;
+    });
+    const filter = this.filter();
+    const matches =
+      (!filter.stage || filter.stage === created.stage) &&
+      (!filter.status || filter.status === created.status) &&
+      normalizeContactSearch(created.organizationName).startsWith(
+        normalizeContactSearch(filter.search),
+      );
+    if (matches) this.total.update((total) => total + 1);
+    this.pageIndex.set(0);
+    void this.load(
+      { filter, size: this.pageSize(), direction: 'first' },
+      0,
+      false,
+    );
+  }
+
   changePage(index: number, size: number): void {
     if (this.state() !== 'success' || ![9, 18, 27].includes(size)) return;
     if (size !== this.pageSize()) {

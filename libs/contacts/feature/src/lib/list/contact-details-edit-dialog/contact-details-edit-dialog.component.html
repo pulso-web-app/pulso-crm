@@ -8,7 +8,9 @@
 
     <div class="dialog-header__fields">
       <h2 class="organization-name">
-        {{ contactForm.organizationName().value() }}
+        {{
+          isCreating ? 'Novo contato' : contactForm.organizationName().value()
+        }}
       </h2>
       <span class="contact-name">{{
         contactForm.contactName().value() || 'Sem responsável'
@@ -94,13 +96,6 @@
             </mat-select>
           </mat-form-field>
         </div>
-
-        <div class="info-badge">
-          <mat-icon class="info-badge__icon">schedule</mat-icon>
-          <span
-            >Último contato: <strong>{{ lastContactLabel() }}</strong></span
-          >
-        </div>
       </section>
 
       <section class="column column--channels">
@@ -135,7 +130,12 @@
           <input
             matInput
             type="tel"
-            [formField]="contactForm.whatsappNumber"
+            pulsoCrmBrazilianPhoneMask
+            [value]="formatPhone(contactForm.whatsappNumber().value())"
+            [disabled]="isSaving()"
+            (phoneChange)="contactForm.whatsappNumber().value.set($event)"
+            autocomplete="tel-national"
+            inputmode="tel"
             placeholder="(00) 00000-0000"
           />
           <mat-icon matPrefix class="channel-icon channel-icon--whatsapp">
@@ -143,6 +143,12 @@
           </mat-icon>
         </mat-form-field>
       </section>
+      <pulso-crm-last-contact-editor
+        [value]="contactForm.lastContactAt().value()"
+        [disabled]="isSaving()"
+        (valueChange)="contactForm.lastContactAt().value.set($event)"
+        (invalidChange)="lastContactInvalid.set($event)"
+      />
     </div>
 
     <mat-divider />
