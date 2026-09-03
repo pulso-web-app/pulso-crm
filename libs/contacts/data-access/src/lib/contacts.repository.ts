@@ -1,8 +1,9 @@
-import { inject, Injectable, InjectionToken, Provider } from '@angular/core';
+import { inject, InjectionToken, Provider, Service } from '@angular/core';
 import { FirebaseApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import {
   collection,
+  deleteField,
   documentId,
   endBefore,
   getCountFromServer,
@@ -14,6 +15,8 @@ import {
   query,
   QueryConstraint,
   startAfter,
+  updateDoc,
+  doc,
   where,
 } from 'firebase/firestore';
 import { distinctUntilChanged, Observable, shareReplay } from 'rxjs';
@@ -54,7 +57,7 @@ export type ContactSummary = { readonly total: number } & Readonly<
   Record<Exclude<ContactStage, 'contact'>, number>
 >;
 
-@Injectable()
+@Service()
 export class ContactsRepository {
   private readonly app = inject(CONTACTS_FIREBASE_APP)();
   private readonly firestore = getFirestore(this.app);
@@ -136,6 +139,27 @@ export class ContactsRepository {
       'no-response': noResponse,
       'not-interested': notInterested,
     };
+  }
+
+  async updateContact(contact: Contact): Promise<void> {
+    const contactRef = doc(this.firestore, 'contacts', contact.id);
+    const organizationNameSearch = normalizeContactSearch(contact.organizationName);
+    await updateDoc(contactRef, {
+      organizationName: contact.organizationName,
+      organizationNameSearch,
+      stage: contact.stage,
+      status: contact.status,
+      lastContactAt: contact.lastContactAt,
+      contactName: contact.contactName?.trim() || deleteField(),
+      instagramHandle: contact.instagramHandle?.trim() || deleteField(),
+      instagramProfileUrl: contact.instagramProfileUrl?.trim() || deleteField(),
+      whatsappNumber: contact.whatsappNumber?.trim() || deleteField(),
+      activities: contact.activities.map((a) => ({
+        text: a.text,
+        createdAt: a.createdAt,
+        updatedAt: a.updatedAt,
+      })),
+    });
   }
 
   private directoryQuery(filter: ContactFilter) {

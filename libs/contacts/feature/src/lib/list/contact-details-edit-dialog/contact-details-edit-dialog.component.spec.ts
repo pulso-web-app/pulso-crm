@@ -1,7 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { vi } from 'vitest';
 import { Contact } from '@pulso-crm/contacts-data-access';
+import { ContactsRepository } from '@pulso-crm/contacts-data-access';
 import { ContactDetailsEditDialogComponent } from './contact-details-edit-dialog.component';
 
 const CONTACT: Contact = {
@@ -26,16 +28,22 @@ const CONTACT: Contact = {
 describe('ContactDetailsEditDialogComponent', () => {
   let component: ContactDetailsEditDialogComponent;
   let fixture: ComponentFixture<ContactDetailsEditDialogComponent>;
-  let dialogRef: { close: ReturnType<typeof vi.fn> };
+  let dialogRef: { close: ReturnType<typeof vi.fn>; disableClose: boolean };
+  let snackBar: { open: ReturnType<typeof vi.fn> };
+  let repository: { updateContact: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    dialogRef = { close: vi.fn() };
+    dialogRef = { close: vi.fn(), disableClose: false };
+    snackBar = { open: vi.fn() };
+    repository = { updateContact: vi.fn().mockResolvedValue(undefined) };
 
     await TestBed.configureTestingModule({
       imports: [ContactDetailsEditDialogComponent],
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: { contact: CONTACT } },
         { provide: MatDialogRef, useValue: dialogRef },
+        { provide: ContactsRepository, useValue: repository },
+        { provide: MatSnackBar, useValue: snackBar },
       ],
     }).compileComponents();
 
@@ -133,13 +141,13 @@ describe('ContactDetailsEditDialogComponent', () => {
     );
   });
 
-  it('saves trimmed values without empty optional or UI-only fields', () => {
+  it('saves trimmed values without empty optional or UI-only fields', async () => {
     component.contactForm.organizationName().value.set('  ACME Atualizada  ');
     component.contactForm.contactName().value.set('   ');
     component.contactForm.instagramHandle().value.set('   ');
     component.newActivityText.set('Rascunho não adicionado');
 
-    component.save();
+    await component.save();
 
     const savedContact = dialogRef.close.mock.calls[0][0] as Record<
       string,
@@ -162,5 +170,93 @@ describe('ContactDetailsEditDialogComponent', () => {
     expect(CONTACT.contactName).toBe('Maria Silva');
     expect(CONTACT.activities).toHaveLength(1);
     expect(CONTACT.activities[0].text).toBe('Enviou proposta de serviço');
+    expect(repository.updateContact).not.toHaveBeenCalled();
+  });
+
+  it.each(['', '   '])(
+    'rejects invalid organization %j without writing',
+    async (name) => {
+      component.contactForm.organizationName().value.set(name);
+      await component.save();
+      fixture.detectChanges();
+      expect(repository.updateContact).not.toHaveBeenCalled();
+      expect(
+        fixture.nativeElement.querySelector('.dialog-footer button:last-child')
+          .disabled,
+      ).toBe(true);
+    },
+  );
+
+  it('shows pending feedback, freezes editing, and prevents duplicate saves and cancellation', async () => {
+    let resolve!: () => void;
+    repository.updateContact.mockReturnValueOnce(
+      new Promise<void>((yes) => {
+        resolve = yes;
+      }),
+    );
+    const saving = component.save();
+    fixture.detectChanges();
+    expect(component.isSaving()).toBe(true);
+    expect(dialogRef.disableClose).toBe(true);
+    expect(fixture.nativeElement.querySelector('mat-spinner')).not.toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Salvando…');
+    const buttons = Array.from(
+      fixture.nativeElement.querySelectorAll('.dialog-footer button'),
+    ) as HTMLButtonElement[];
+    expect(buttons.every((button) => button.disabled)).toBe(true);
+    expect(component.contactForm.organizationName().disabled()).toBe(true);
+    component.newActivityText.set('Not submitted');
+    component.addActivity();
+    component.close();
+    await component.save();
+    expect(repository.updateContact).toHaveBeenCalledTimes(1);
+    expect(component.contactForm.activities().value()).toHaveLength(1);
+    expect(dialogRef.close).not.toHaveBeenCalled();
+    expect(snackBar.open).not.toHaveBeenCalled();
+    resolve();
+    await saving;
+    expect(component.isSaving()).toBe(false);
+    expect(dialogRef.disableClose).toBe(false);
+    expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ id: CONTACT.id }),
+    );
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'Contato atualizado com sucesso.',
+      'Fechar',
+      expect.any(Object),
+    );
+  });
+
+  it('keeps the draft on failure and allows a successful retry', async () => {
+    repository.updateContact.mockRejectedValueOnce(
+      new Error('permission-denied'),
+    );
+    component.contactForm.organizationName().value.set('Retry draft');
+    await component.save();
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[role="alert"]').textContent,
+    ).toContain('Não foi possível salvar o contato');
+    expect(fixture.nativeElement.querySelector('mat-spinner')).toBeNull();
+    expect(component.contactForm.organizationName().value()).toBe(
+      'Retry draft',
+    );
+    expect(component.contactForm.organizationName().disabled()).toBe(false);
+    expect(dialogRef.disableClose).toBe(false);
+    expect(dialogRef.close).not.toHaveBeenCalled();
+    expect(snackBar.open).not.toHaveBeenCalled();
+    await component.save();
+    expect(component.saveError()).toBeNull();
+    expect(repository.updateContact).toHaveBeenCalledTimes(2);
+    expect(dialogRef.close).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ organizationName: 'Retry draft' }),
+    );
+  });
+
+  it('allows cancellation after a failed save', async () => {
+    repository.updateContact.mockRejectedValueOnce(new Error('unavailable'));
+    await component.save();
+    component.close();
+    expect(dialogRef.close).toHaveBeenCalledWith();
   });
 });

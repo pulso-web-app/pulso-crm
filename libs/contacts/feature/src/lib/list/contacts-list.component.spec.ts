@@ -60,6 +60,7 @@ describe('ContactsListComponent', () => {
     readPage: ReturnType<typeof vi.fn>;
     count: ReturnType<typeof vi.fn>;
     summary: ReturnType<typeof vi.fn>;
+    updateContact: ReturnType<typeof vi.fn>;
   };
   let initial: ReturnType<typeof deferred<ContactPage>>;
 
@@ -74,6 +75,7 @@ describe('ContactsListComponent', () => {
         .mockImplementationOnce(() => initial.promise),
       count: vi.fn().mockResolvedValue(1),
       summary: vi.fn().mockResolvedValue(SUMMARY),
+      updateContact: vi.fn().mockResolvedValue(undefined),
     };
     await TestBed.configureTestingModule({
       imports: [ContactsListComponent],
@@ -241,9 +243,19 @@ describe('ContactsListComponent', () => {
     await settle();
   });
 
-  it('keeps the persisted page unchanged when the existing dialog returns an edited draft', async () => {
+  it('updates the displayed card only after persistence without reloading and reopens with saved values', async () => {
     await loaded();
+    store.page.update((page) => ({
+      ...page,
+      contacts: page.contacts.map((contact) => ({
+        ...contact,
+        instagramHandle: '@old',
+      })),
+    }));
+    await settle();
     const original = structuredClone(store.page());
+    const pending = deferred<void>();
+    repository.updateContact.mockReturnValueOnce(pending.promise);
     (
       host().querySelector('pulso-crm-contact-card mat-card') as HTMLElement
     ).click();
@@ -252,18 +264,145 @@ describe('ContactsListComponent', () => {
     const editor = ref.componentInstance as ContactDetailsEditDialogComponent;
 
     editor.contactForm.organizationName().value.set('Rascunho editado');
+    editor.contactForm.instagramHandle().value.set('');
     editor.newActivityText.set('Atividade em rascunho');
     editor.addActivity();
     const closed = firstValueFrom(ref.afterClosed());
-    editor.save();
+    const saving = editor.save();
+    await settle();
+    expect(store.page()).toEqual(original);
+    expect(ref.disableClose).toBe(true);
+    document.querySelector<HTMLElement>('.cdk-overlay-backdrop')?.click();
+    document.querySelector<HTMLElement>('.cdk-overlay-pane')?.dispatchEvent(
+      new KeyboardEvent('keydown', {
+        key: 'Escape',
+        code: 'Escape',
+        keyCode: 27,
+        bubbles: true,
+      }),
+    );
+    editor.close();
+    await settle();
+    expect(TestBed.inject(MatDialog).openDialogs).toHaveLength(1);
+    pending.resolve();
+    await saving;
     await closed;
     await settle();
 
     expect(TestBed.inject(MatDialog).openDialogs).toHaveLength(0);
-    expect(store.page()).toEqual(original);
-    expect(host().textContent).toContain('Órbita Design');
-    expect(host().textContent).not.toContain('Rascunho editado');
+    expect(store.page().contacts[0].organizationName).toBe('Rascunho editado');
+    expect(store.page().first).toEqual(original.first);
+    expect(store.page().last).toEqual(original.last);
+    expect(host().textContent).not.toContain('Órbita Design');
+    expect(host().textContent).toContain('Rascunho editado');
     expect(repository.readPage).toHaveBeenCalledTimes(1);
+    expect(repository.summary).toHaveBeenCalledTimes(1);
+    expect(repository.count).not.toHaveBeenCalled();
+    (
+      host().querySelector('pulso-crm-contact-card mat-card') as HTMLElement
+    ).click();
+    await settle();
+    const reopened = TestBed.inject(MatDialog).openDialogs[0];
+    expect(
+      reopened.componentInstance.contactForm.organizationName().value(),
+    ).toBe('Rascunho editado');
+    expect(
+      reopened.componentInstance.contactForm.activities().value(),
+    ).toHaveLength(1);
+    const cancelled = firstValueFrom(reopened.afterClosed());
+    expect(
+      reopened.componentInstance.contactForm.instagramHandle().value(),
+    ).toBe('');
+    expect(host().textContent).not.toContain('@old');
+    reopened.componentInstance.close();
+    await cancelled;
+  });
+
+  it('replaces a saved contact and adjusts stage metrics while retaining filtered page boundaries', async () => {
+    await loaded();
+    store.stage('client');
+    await settle();
+    const selected = { ...page().contacts[0], instagramHandle: '@old' };
+    const unrelated = page('Other', 'contact-b').contacts[0];
+    store.page.set({ ...page(), contacts: [selected, unrelated] });
+    store.pageIndex.set(2);
+    const before = store.page();
+    const total = store.total();
+    const reads = repository.readPage.mock.calls.length;
+    const counts = repository.count.mock.calls.length;
+    store.applyUpdatedContact({
+      ...page().contacts[0],
+      organizationName: 'Renamed',
+      stage: 'hot-lead',
+    });
+    expect(store.page().contacts[0]).not.toHaveProperty('instagramHandle');
+    expect(store.page().contacts[1]).toBe(unrelated);
+    expect(store.page().first).toEqual(before.first);
+    expect(store.page().last).toEqual(before.last);
+    expect(store.pageIndex()).toBe(2);
+    expect(store.pageSize()).toBe(9);
+    expect(store.filter().stage).toBe('client');
+    expect(store.total()).toBe(total);
+    expect(store.summary()).toEqual({ ...SUMMARY, client: 3, 'hot-lead': 5 });
+    store.applyUpdatedContact({
+      ...store.page().contacts[0],
+      stage: 'contact',
+    });
+    expect(store.summary()).toEqual({ ...SUMMARY, client: 3 });
+    store.applyUpdatedContact({ ...store.page().contacts[0], stage: 'client' });
+    expect(store.summary()).toEqual(SUMMARY);
+    expect(repository.readPage).toHaveBeenCalledTimes(reads);
+    expect(repository.count).toHaveBeenCalledTimes(counts);
+    expect(repository.summary).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores confirmed updates for absent contacts, during loads, or after sign-out', async () => {
+    await loaded();
+    const before = store.page();
+    store.applyUpdatedContact(page('Absent', 'absent').contacts[0]);
+    expect(store.page()).toBe(before);
+    const pending = deferred<ContactPage>();
+    repository.readPage.mockReturnValueOnce(pending.promise);
+    store.changePage(1, 9);
+    store.applyUpdatedContact({
+      ...before.contacts[0],
+      organizationName: 'Stale',
+    });
+    expect(store.page()).toBe(before);
+    user.next(null);
+    store.applyUpdatedContact(before.contacts[0]);
+    expect(store.page().contacts).toEqual([]);
+    expect(store.summary()).toBeNull();
+    pending.resolve(page());
+    await settle();
+    expect(store.page().contacts).toEqual([]);
+  });
+
+  it('keeps the list unchanged after a failed save and cancellation without extra reads', async () => {
+    await loaded();
+    const before = structuredClone(store.page());
+    repository.updateContact.mockRejectedValueOnce(new Error('unavailable'));
+    (
+      host().querySelector('pulso-crm-contact-card mat-card') as HTMLElement
+    ).click();
+    await settle();
+    const ref = TestBed.inject(MatDialog).openDialogs[0];
+    const editor = ref.componentInstance as ContactDetailsEditDialogComponent;
+    editor.contactForm.organizationName().value.set('Failed edit');
+    await editor.save();
+    await settle();
+    expect(
+      document.getElementById(ref.id)?.querySelector('[role="alert"]'),
+    ).not.toBeNull();
+    expect(store.page()).toEqual(before);
+    expect(store.summary()).toEqual(SUMMARY);
+    const closed = firstValueFrom(ref.afterClosed());
+    editor.close();
+    await closed;
+    expect(store.page()).toEqual(before);
+    expect(repository.readPage).toHaveBeenCalledTimes(1);
+    expect(repository.summary).toHaveBeenCalledTimes(1);
+    expect(repository.count).not.toHaveBeenCalled();
   });
 
   it('requests only the partial last page and supports returning directly to the first', async () => {
@@ -347,7 +486,7 @@ describe('ContactsListComponent', () => {
 
   it('shows paginator with is-floating class when not at bottom', async () => {
     await loaded();
-    const paginatorEl = host().querySelector('mat-paginator')! as HTMLElement;
+    const paginatorEl = host().querySelector('mat-paginator') as HTMLElement;
     expect(paginatorEl.classList.contains('is-floating')).toBeTruthy();
   });
 
@@ -361,7 +500,7 @@ describe('ContactsListComponent', () => {
     await loaded();
     store.changePage(0, 27);
     await settle();
-    const paginatorEl = host().querySelector('mat-paginator')! as HTMLElement;
+    const paginatorEl = host().querySelector('mat-paginator') as HTMLElement;
     expect(paginatorEl.classList.contains('is-floating')).toBeTruthy();
   });
 

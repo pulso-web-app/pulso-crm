@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { form, FormField, required } from '@angular/forms/signals';
+import { disabled, form, FormField, validate } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import {
@@ -14,13 +14,17 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { omitEmptyFields } from '@pulso-crm/shared-util';
 import { ContactAvatarComponent } from '../contact-avatar/contact-avatar.component';
 import { ContactClassificationComponent } from '../contact-classification/contact-classification.component';
+import { ContactsRepository } from '@pulso-crm/contacts-data-access';
 import {
   Contact,
   CONTACT_STAGE_OPTIONS,
   CONTACT_STATUS_OPTIONS,
+  normalizeContactSearch,
 } from '@pulso-crm/contacts-data-access';
 
 export interface ContactDetailsEditDialogData {
@@ -47,6 +51,7 @@ type ContactEditForm = {
     MatInputModule,
     MatSelectModule,
     MatTooltipModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './contact-details-edit-dialog.component.html',
   styleUrl: './contact-details-edit-dialog.component.scss',
@@ -56,9 +61,14 @@ export class ContactDetailsEditDialogComponent {
     MatDialogRef<ContactDetailsEditDialogComponent, Contact>,
   );
   readonly data = inject<ContactDetailsEditDialogData>(MAT_DIALOG_DATA);
+  readonly repository = inject(ContactsRepository);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly stageOptions = CONTACT_STAGE_OPTIONS;
   readonly statusOptions = CONTACT_STATUS_OPTIONS;
+
+  readonly isSaving = signal(false);
+  readonly saveError = signal<string | null>(null);
 
   readonly contactFormModel = signal<ContactEditForm>({
     id: this.data.contact.id,
@@ -76,9 +86,12 @@ export class ContactDetailsEditDialogComponent {
   });
 
   readonly contactForm = form(this.contactFormModel, (schemaPath) => {
-    required(schemaPath.organizationName, {
-      message: 'O nome da organização é obrigatório.',
-    });
+    disabled(schemaPath, () => this.isSaving());
+    validate(schemaPath.organizationName, ({ value }) =>
+      value().trim()
+        ? null
+        : { kind: 'required', message: 'O nome da organização é obrigatório.' },
+    );
   });
 
   readonly showNewActivityForm = signal(false);
@@ -101,6 +114,7 @@ export class ContactDetailsEditDialogComponent {
   }
 
   toggleNewActivityForm(): void {
+    if (this.isSaving()) return;
     this.showNewActivityForm.update((isVisible) => !isVisible);
     if (!this.showNewActivityForm()) {
       this.newActivityText.set('');
@@ -108,6 +122,7 @@ export class ContactDetailsEditDialogComponent {
   }
 
   addActivity(): void {
+    if (this.isSaving()) return;
     const text = this.newActivityText().trim();
     if (!text) {
       return;
@@ -136,18 +151,39 @@ export class ContactDetailsEditDialogComponent {
     }).format(date);
   }
 
-  save(): void {
-    this.dialogRef.close(this.buildUpdatedContact());
+  async save(): Promise<void> {
+    if (this.isSaving() || this.contactForm().invalid()) return;
+    const updatedContact = this.buildUpdatedContact();
+    const previousDisableClose = this.dialogRef.disableClose;
+    this.saveError.set(null);
+    this.isSaving.set(true);
+    this.dialogRef.disableClose = true;
+    try {
+      await this.repository.updateContact(updatedContact);
+    } catch {
+      this.saveError.set('Não foi possível salvar o contato. Tente novamente.');
+      return;
+    } finally {
+      this.isSaving.set(false);
+      this.dialogRef.disableClose = previousDisableClose;
+    }
+    this.dialogRef.close(updatedContact);
+    this.snackBar.open('Contato atualizado com sucesso.', 'Fechar', {
+      duration: 5000,
+    });
   }
 
   close(): void {
+    if (this.isSaving()) return;
     this.dialogRef.close();
   }
 
   private buildUpdatedContact(): Contact {
+    const organizationName = this.contactForm.organizationName().value();
     return omitEmptyFields({
       ...this.data.contact,
       ...this.contactFormModel(),
-    });
+      organizationNameSearch: normalizeContactSearch(organizationName),
+    }) as Contact;
   }
 }

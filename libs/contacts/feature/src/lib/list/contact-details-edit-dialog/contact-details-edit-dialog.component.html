@@ -1,4 +1,4 @@
-<div class="dialog-shell">
+<div class="dialog-shell" [attr.aria-busy]="isSaving()">
   <header class="dialog-header">
     <pulso-crm-contact-avatar
       class="dialog-header__avatar"
@@ -154,6 +154,7 @@
           mat-icon-button
           class="add-activity-btn"
           (click)="toggleNewActivityForm()"
+          [disabled]="isSaving()"
           matTooltip="Nova atividade"
           type="button"
         >
@@ -169,6 +170,7 @@
               matInput
               rows="2"
               [ngModel]="newActivityText()"
+              [disabled]="isSaving()"
               (ngModelChange)="newActivityText.set($event)"
               placeholder="Ex: Ligou para alinhar reunião..."
             ></textarea>
@@ -177,7 +179,7 @@
             mat-flat-button
             color="primary"
             (click)="addActivity()"
-            [disabled]="!newActivityText().trim()"
+            [disabled]="isSaving() || !newActivityText().trim()"
             type="button"
           >
             Adicionar
@@ -209,17 +211,35 @@
 
   <mat-divider />
 
+  @if (saveError(); as error) {
+    <p class="save-error" role="alert">{{ error }}</p>
+  }
+
   <mat-dialog-actions align="end" class="dialog-footer">
-    <button mat-stroked-button type="button" (click)="close()">Cancelar</button>
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="close()"
+      [disabled]="isSaving()"
+    >
+      Cancelar
+    </button>
     <button
       mat-flat-button
       color="primary"
       type="button"
       (click)="save()"
-      [disabled]="contactForm().invalid()"
+      [disabled]="isSaving() || contactForm().invalid()"
     >
-      <mat-icon>check</mat-icon>
-      Salvar
+      <span class="save-button-content">
+        @if (isSaving()) {
+          <mat-spinner diameter="18" aria-label="Salvando contato" />
+          Salvando…
+        } @else {
+          <mat-icon>check</mat-icon>
+          Salvar
+        }
+      </span>
     </button>
   </mat-dialog-actions>
 </div>

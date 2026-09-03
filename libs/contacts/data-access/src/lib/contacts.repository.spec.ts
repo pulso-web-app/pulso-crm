@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { deleteApp, FirebaseApp, initializeApp } from 'firebase/app';
 import {
   collection,
+  deleteField,
   documentId,
   endBefore,
   getCountFromServer,
@@ -13,9 +14,11 @@ import {
   query,
   queryEqual,
   startAfter,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 import { vi } from 'vitest';
+import { Contact } from './contact.models';
 import {
   ContactsRepository,
   provideContactsDataAccess,
@@ -28,6 +31,7 @@ vi.mock('firebase/firestore', async (importOriginal) =>
     {
       getDocsFromServer: vi.fn(),
       getCountFromServer: vi.fn(),
+      updateDoc: vi.fn().mockResolvedValue(undefined),
     },
   ),
 );
@@ -76,6 +80,65 @@ describe('ContactsRepository', () => {
       orderBy(documentId()),
     );
   }
+
+  const contact: Contact = {
+    id: 'contact-a',
+    organizationName: 'Órbita',
+    stage: 'client',
+    status: 'new',
+    lastContactAt: '2026-09-02T12:00:00Z',
+    activities: [],
+  };
+
+  it.each([undefined, '', '   '])(
+    'removes optional fields with value %j instead of sending undefined or blank text',
+    async (value) => {
+      await repository.updateContact({
+        ...contact,
+        contactName: value,
+        instagramHandle: value,
+        instagramProfileUrl: value,
+        whatsappNumber: value,
+      });
+
+      expect(updateDoc).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ path: 'contacts/contact-a' }),
+        {
+          organizationName: 'Órbita',
+          organizationNameSearch: 'orbita',
+          stage: 'client',
+          status: 'new',
+          lastContactAt: contact.lastContactAt,
+          activities: [],
+          contactName: deleteField(),
+          instagramHandle: deleteField(),
+          instagramProfileUrl: deleteField(),
+          whatsappNumber: deleteField(),
+        },
+      );
+    },
+  );
+
+  it('saves populated optional fields and activity history', async () => {
+    const fields = {
+      contactName: 'Ana',
+      instagramHandle: '@orbita',
+      instagramProfileUrl: 'https://www.instagram.com/orbita/',
+      whatsappNumber: '11999999999',
+      activities: [
+        {
+          text: 'Proposal sent',
+          createdAt: contact.lastContactAt,
+          updatedAt: contact.lastContactAt,
+        },
+      ],
+    };
+    await repository.updateContact({ ...contact, ...fields });
+    expect(updateDoc).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ path: 'contacts/contact-a' }),
+      expect.objectContaining(fields),
+    );
+  });
 
   it('fetches only the bounded first page from the shared contacts collection', async () => {
     const page = await repository.readPage({

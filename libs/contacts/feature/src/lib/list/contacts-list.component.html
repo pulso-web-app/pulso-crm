@@ -46,7 +46,10 @@
       @if (store.page().contacts.length) {
         <div class="contacts-grid">
           @for (contact of store.page().contacts; track contact.id) {
-            <pulso-crm-contact-card [contact]="contact" />
+            <pulso-crm-contact-card
+              [contact]="contact"
+              (contactUpdated)="store.applyUpdatedContact($event)"
+            />
           }
         </div>
         @if (store.total() > 9) {

@@ -11,7 +11,7 @@ The repository currently implements the contacts navigation and visual foundatio
 - Contact details and edit route shells.
 - Feature-first `contacts-feature` and `contacts-data-access` Nx projects and CRM-local shared libraries.
 
-The directory reads the shared Firestore contacts for every authenticated user. Clicking a card opens the existing editing dialog, prefilled with the selected contact and its activity history. The form and draft interactions are preserved; create, update, and interaction persistence remain unimplemented. See [the Firestore guide](docs/firestore-contacts.md) for the data contract, index preparation, and explicit synthetic seed command.
+The directory reads shared Firestore contacts for every authenticated user. Clicking a card opens the editing dialog, prefilled with the selected contact and activity history. Saving persists edits with loading and outcome feedback, then updates the visible card locally without extra reads. Creating contacts and separate interaction persistence remain unimplemented. See [the Firestore guide](docs/firestore-contacts.md) for the data contract, index preparation, and explicit synthetic seed command.
 
 ## Federation contract
 

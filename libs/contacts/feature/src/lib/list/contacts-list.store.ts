@@ -1,6 +1,7 @@
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
+  Contact,
   ContactFilter,
   ContactPage,
   ContactPageRequest,
@@ -83,6 +84,27 @@ export class ContactsListStore {
   retry(): void {
     this.summary.set(null);
     this.refresh();
+  }
+
+  applyUpdatedContact(updated: Contact): void {
+    if (this.state() !== 'success') return;
+    const previous = this.page().contacts.find(({ id }) => id === updated.id);
+    if (!previous) return;
+
+    this.page.update((page) => ({
+      ...page,
+      contacts: page.contacts.map((contact) =>
+        contact.id === updated.id ? updated : contact,
+      ),
+    }));
+    if (previous.stage === updated.stage) return;
+    this.summary.update((summary) => {
+      if (!summary) return summary;
+      const next = { ...summary };
+      if (previous.stage !== 'contact') next[previous.stage]--;
+      if (updated.stage !== 'contact') next[updated.stage]++;
+      return next;
+    });
   }
 
   changePage(index: number, size: number): void {

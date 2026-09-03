@@ -1,5 +1,12 @@
 import { DatePipe } from '@angular/common';
-import { Component, DestroyRef, inject, input, output } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  inject,
+  input,
+  output,
+  ViewContainerRef,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -36,6 +43,7 @@ export class ContactCardComponent {
   private readonly datePipe = inject(DatePipe);
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = inject(MatDialog);
+  private readonly viewContainerRef = inject(ViewContainerRef);
 
   readonly contact = input.required<Contact>();
   readonly contactUpdated = output<Contact>();
@@ -68,6 +76,7 @@ export class ContactCardComponent {
       ContactDetailsEditDialogData,
       Contact
     >(ContactDetailsEditDialogComponent, {
+      viewContainerRef: this.viewContainerRef,
       width: '900px',
       maxWidth: '95vw',
       maxHeight: '90vh',
