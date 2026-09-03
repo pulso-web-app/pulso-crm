@@ -1,0 +1,178 @@
+<div class="import-dialog" [attr.aria-busy]="isImporting()">
+  <header class="import-dialog__header">
+    <div class="import-dialog__heading">
+      <span class="import-dialog__icon" aria-hidden="true">
+        <mat-icon>upload_file</mat-icon>
+      </span>
+      <div>
+        <h2>Importar contatos</h2>
+        <p>Adicione de 1 a 500 contatos usando um array JSON.</p>
+      </div>
+    </div>
+  </header>
+
+  <mat-divider />
+
+  <mat-dialog-content class="import-dialog__content">
+    <section class="helper-actions" aria-label="Ajuda para criar o JSON">
+      <div>
+        <h3 class="helper-actions__title">Precisa preparar o arquivo?</h3>
+        <p>Copie o prompt para uma IA ou use nosso exemplo como modelo.</p>
+      </div>
+      <div class="helper-actions__buttons">
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="isImporting()"
+          (click)="copyPrompt()"
+        >
+          <mat-icon>auto_awesome</mat-icon>
+          Copiar prompt para IA
+        </button>
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="isImporting()"
+          (click)="copyFormat()"
+        >
+          <mat-icon>data_object</mat-icon>
+          Copiar formato JSON
+        </button>
+      </div>
+    </section>
+
+    @if (copyFeedback(); as feedback) {
+      <p
+        class="feedback"
+        [class.feedback--error]="feedback.kind === 'error'"
+        [attr.role]="feedback.kind === 'error' ? 'alert' : 'status'"
+      >
+        <mat-icon aria-hidden="true">{{
+          feedback.kind === 'error' ? 'error' : 'check_circle'
+        }}</mat-icon>
+        {{ feedback.message }}
+      </p>
+    }
+
+    <section class="source-section">
+      <div class="source-section__title">
+        <div>
+          <h3 class="section-title">Conteúdo JSON</h3>
+          <p>
+            Cole abaixo ou carregue um arquivo para revisar antes de importar.
+          </p>
+        </div>
+        <label
+          class="file-button"
+          [class.file-button--disabled]="isImporting()"
+        >
+          <input
+            type="file"
+            accept=".json,application/json"
+            [disabled]="isImporting()"
+            (change)="loadFile($event)"
+          />
+          <mat-icon>attach_file</mat-icon>
+          Selecionar arquivo
+        </label>
+      </div>
+
+      @if (fileName()) {
+        <p class="file-name">
+          <mat-icon aria-hidden="true">description</mat-icon>{{ fileName() }}
+        </p>
+      }
+      @if (fileError()) {
+        <p class="feedback feedback--error" role="alert">
+          <mat-icon aria-hidden="true">error</mat-icon>{{ fileError() }}
+        </p>
+      }
+
+      <mat-form-field
+        appearance="outline"
+        class="json-field"
+        subscriptSizing="dynamic"
+      >
+        <mat-label>Array JSON de contatos</mat-label>
+        <textarea
+          matInput
+          rows="9"
+          spellcheck="false"
+          [ngModel]="source()"
+          [disabled]="isImporting()"
+          (ngModelChange)="updateSource($event)"
+          placeholder='[{ "organizationName": "Empresa Exemplo" }]'
+        ></textarea>
+      </mat-form-field>
+    </section>
+
+    @if (result(); as validation) {
+      @if (validation.valid) {
+        <section class="validation validation--success" role="status">
+          <mat-icon aria-hidden="true">check_circle</mat-icon>
+          <div>
+            <strong>JSON pronto para importar</strong>
+            <span
+              >{{ validCount() }}
+              {{
+                validCount() === 1 ? 'contato válido' : 'contatos válidos'
+              }}</span
+            >
+          </div>
+        </section>
+      } @else {
+        <section class="validation validation--error" role="alert">
+          <div class="validation__heading">
+            <mat-icon aria-hidden="true">error</mat-icon>
+            <strong>Corrija os erros antes de importar</strong>
+          </div>
+          <ul>
+            @for (issue of formattedIssues(); track $index) {
+              <li>{{ issue }}</li>
+            }
+          </ul>
+        </section>
+      }
+    } @else {
+      <p class="empty-guidance" role="status">
+        O JSON será validado automaticamente enquanto você edita.
+      </p>
+    }
+
+    @if (importError()) {
+      <p class="feedback feedback--error" role="alert">
+        <mat-icon aria-hidden="true">cloud_off</mat-icon>{{ importError() }}
+      </p>
+    }
+  </mat-dialog-content>
+
+  <mat-divider />
+
+  <mat-dialog-actions align="end" class="import-dialog__actions">
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="isImporting()"
+      (click)="close()"
+    >
+      Cancelar
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      [disabled]="isImporting() || !result()?.valid"
+      (click)="import()"
+    >
+      <span class="import-button-content">
+        @if (isImporting()) {
+          <mat-spinner diameter="18" aria-label="Importando contatos" />
+          Importando…
+        } @else {
+          <mat-icon>upload</mat-icon>
+          Importar
+        }
+      </span>
+    </button>
+  </mat-dialog-actions>
+</div>

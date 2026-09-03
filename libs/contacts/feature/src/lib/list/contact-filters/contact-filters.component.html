@@ -76,6 +76,16 @@
 
 <div class="filters-right">
   <button
+    mat-stroked-button
+    color="primary"
+    type="button"
+    [disabled]="createDisabled()"
+    (click)="importRequested.emit()"
+  >
+    <mat-icon>upload</mat-icon>
+    Importar contatos
+  </button>
+  <button
     mat-flat-button
     color="primary"
     type="button"

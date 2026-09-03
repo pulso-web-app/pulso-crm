@@ -28,6 +28,7 @@ import {
 export class ContactFiltersComponent {
   readonly createDisabled = input(false);
   readonly createRequested = output<void>();
+  readonly importRequested = output<void>();
   readonly selectedStage = model<ContactStage | null>(null);
   readonly selectedStatus = model<ContactStatus | null>(null);
   readonly searchContact = model('');

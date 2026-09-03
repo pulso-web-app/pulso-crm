@@ -15,6 +15,7 @@ import { ContactsListComponent } from './contacts-list.component';
 import { ContactsListStore } from './contacts-list.store';
 import { ContactFiltersComponent } from './contact-filters/contact-filters.component';
 import { ContactDetailsEditDialogComponent } from './contact-details-edit-dialog/contact-details-edit-dialog.component';
+import { ContactImportDialogComponent } from './contact-import-dialog/contact-import-dialog.component';
 
 const SUMMARY: ContactSummary = {
   total: 29,
@@ -62,6 +63,7 @@ describe('ContactsListComponent', () => {
     summary: ReturnType<typeof vi.fn>;
     updateContact: ReturnType<typeof vi.fn>;
     createContact: ReturnType<typeof vi.fn>;
+    importContacts: ReturnType<typeof vi.fn>;
   };
   let initial: ReturnType<typeof deferred<ContactPage>>;
 
@@ -78,6 +80,7 @@ describe('ContactsListComponent', () => {
       summary: vi.fn().mockResolvedValue(SUMMARY),
       updateContact: vi.fn().mockResolvedValue(undefined),
       createContact: vi.fn(),
+      importContacts: vi.fn(),
     };
     await TestBed.configureTestingModule({
       imports: [ContactsListComponent],
@@ -110,9 +113,7 @@ describe('ContactsListComponent', () => {
   }
 
   async function openCreation() {
-    (
-      host().querySelector('.filters-right button') as HTMLButtonElement
-    ).click();
+    actionButton('Novo contato').click();
     await settle();
     const ref = TestBed.inject(MatDialog).openDialogs[0];
     return {
@@ -120,6 +121,68 @@ describe('ContactsListComponent', () => {
       editor: ref.componentInstance as ContactDetailsEditDialogComponent,
     };
   }
+
+  function actionButton(label: string): HTMLButtonElement {
+    return Array.from(host().querySelectorAll('.filters-right button')).find(
+      (button) => button.textContent?.includes(label),
+    ) as HTMLButtonElement;
+  }
+
+  async function openImport() {
+    actionButton('Importar contatos').click();
+    await settle();
+    const ref = TestBed.inject(MatDialog).openDialogs[0];
+    return {
+      ref,
+      importer: ref.componentInstance as ContactImportDialogComponent,
+    };
+  }
+
+  it('opens one import dialog before New contact and leaves cancellation unchanged', async () => {
+    await loaded();
+    expect(actionButton('Importar contatos')).toBeTruthy();
+    const actions = host().querySelectorAll('.filters-right button');
+    expect(actions[0].textContent).toContain('Importar contatos');
+    const before = structuredClone(store.page());
+    const { ref, importer } = await openImport();
+    actionButton('Importar contatos').click();
+    expect(TestBed.inject(MatDialog).openDialogs).toHaveLength(1);
+    const closed = firstValueFrom(ref.afterClosed());
+    importer.close();
+    await closed;
+    expect(store.page()).toEqual(before);
+    expect(repository.readPage).toHaveBeenCalledTimes(1);
+    expect(repository.summary).toHaveBeenCalledTimes(1);
+  });
+
+  it('refreshes page, matching count, and summary after confirmed import', async () => {
+    await loaded();
+    store.stage('client');
+    await settle();
+    const readsBefore = repository.readPage.mock.calls.length;
+    const countsBefore = repository.count.mock.calls.length;
+    const summariesBefore = repository.summary.mock.calls.length;
+    repository.importContacts.mockResolvedValueOnce([
+      page('Importada', 'generated').contacts[0],
+    ]);
+    repository.readPage.mockResolvedValueOnce(page('Importada', 'generated'));
+    const { ref, importer } = await openImport();
+    importer.updateSource('[{"organizationName":"Importada"}]');
+    const closed = firstValueFrom(ref.afterClosed());
+    await importer.import();
+    await closed;
+    await settle();
+    expect(repository.readPage).toHaveBeenCalledTimes(readsBefore + 1);
+    expect(repository.readPage).toHaveBeenLastCalledWith({
+      filter: { search: '', stage: 'client', status: null },
+      size: 9,
+      direction: 'first',
+    });
+    expect(repository.count).toHaveBeenCalledTimes(countsBefore + 1);
+    expect(repository.summary).toHaveBeenCalledTimes(summariesBefore + 1);
+    expect(store.pageIndex()).toBe(0);
+    expect(host().textContent).toContain('Importada');
+  });
 
   it('opens a clean creation form and cancellation never writes or reuses the draft', async () => {
     await loaded();

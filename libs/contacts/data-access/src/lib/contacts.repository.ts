@@ -5,6 +5,7 @@ import {
   addDoc,
   collection,
   deleteField,
+  doc,
   documentId,
   endBefore,
   getCountFromServer,
@@ -17,8 +18,8 @@ import {
   QueryConstraint,
   startAfter,
   updateDoc,
-  doc,
   where,
+  writeBatch,
 } from 'firebase/firestore';
 import { distinctUntilChanged, Observable, shareReplay } from 'rxjs';
 import {
@@ -28,6 +29,7 @@ import {
   ContactStage,
 } from './contact.models';
 import { decodeContact, normalizeContactSearch } from './contact-document';
+import { validateContactImport } from './contact-import';
 
 const CONTACTS_FIREBASE_APP = new InjectionToken<() => FirebaseApp>(
   'Contacts Firebase app',
@@ -148,31 +150,7 @@ export class ContactsRepository {
   }
 
   async createContact(input: ContactInput): Promise<Contact> {
-    const organizationName = input.organizationName.trim();
-    if (!organizationName) throw new Error('Organization name is required.');
-    const optionalFields = Object.fromEntries(
-      Object.entries({
-        contactName: input.contactName,
-        instagramHandle: input.instagramHandle,
-        instagramProfileUrl: input.instagramProfileUrl,
-        whatsappNumber: input.whatsappNumber,
-      })
-        .map(([key, value]) => [key, value?.trim()])
-        .filter(([, value]) => Boolean(value)),
-    );
-    const document = {
-      organizationName,
-      organizationNameSearch: normalizeContactSearch(organizationName),
-      stage: input.stage,
-      status: input.status,
-      lastContactAt: input.lastContactAt,
-      activities: input.activities.map(({ text, createdAt, updatedAt }) => ({
-        text,
-        createdAt,
-        updatedAt,
-      })),
-      ...optionalFields,
-    };
+    const document = prepareContactDocument(input);
     // Validate the stored contract before issuing a write.
     decodeContact('new-contact', document);
     const reference = await addDoc(
@@ -180,6 +158,22 @@ export class ContactsRepository {
       document,
     );
     return decodeContact(reference.id, document);
+  }
+
+  async importContacts(
+    inputs: readonly ContactInput[],
+  ): Promise<readonly Contact[]> {
+    const validated = validateContactImport(inputs);
+    if (!validated.valid) throw new Error('Invalid contact import.');
+    const batch = writeBatch(this.firestore);
+    const pending = validated.contacts.map((input) => {
+      const reference = doc(collection(this.firestore, 'contacts'));
+      const document = prepareContactDocument(input);
+      batch.set(reference, document);
+      return { id: reference.id, document };
+    });
+    await batch.commit();
+    return pending.map(({ id, document }) => decodeContact(id, document));
   }
 
   async updateContact(contact: Contact): Promise<void> {
@@ -223,4 +217,34 @@ export class ContactsRepository {
       orderBy(documentId()),
     );
   }
+}
+
+function prepareContactDocument(input: ContactInput) {
+  const organizationName = input.organizationName.trim();
+  if (!organizationName) throw new Error('Organization name is required.');
+  const optionalFields = Object.fromEntries(
+    Object.entries({
+      contactName: input.contactName,
+      instagramHandle: input.instagramHandle,
+      instagramProfileUrl: input.instagramProfileUrl,
+      whatsappNumber: input.whatsappNumber,
+    })
+      .map(([key, value]) => [key, value?.trim()])
+      .filter(([, value]) => Boolean(value)),
+  );
+  const document = {
+    organizationName,
+    organizationNameSearch: normalizeContactSearch(organizationName),
+    stage: input.stage,
+    status: input.status,
+    lastContactAt: input.lastContactAt,
+    activities: input.activities.map(({ text, createdAt, updatedAt }) => ({
+      text,
+      createdAt,
+      updatedAt,
+    })),
+    ...optionalFields,
+  };
+  decodeContact('new-contact', document);
+  return document;
 }

@@ -7,11 +7,12 @@ Pulso CRM is the customer-relationship remote for the Pulso web application. It 
 The repository currently implements the contacts navigation and visual foundations:
 
 - Firestore-backed contacts list with organization-name prefix search, stage/status filters, aggregate metrics, and cursor pagination.
+- Atomic JSON import for one to 500 contacts from pasted text or a local file.
 - New-contact route and form shell.
 - Contact details and edit route shells.
 - Feature-first `contacts-feature` and `contacts-data-access` Nx projects and CRM-local shared libraries.
 
-The directory reads shared Firestore contacts for every authenticated user. New contact opens the shared modal with an empty draft; clicking a card opens it for editing. Both modes persist with loading and outcome feedback. Edits update the card locally without reads; creation refreshes one bounded page and updates cached counts without aggregations. Separate interaction persistence remains unimplemented. See [the Firestore guide](docs/firestore-contacts.md) for the data contract, index preparation, and explicit synthetic seed command.
+The directory reads shared Firestore contacts for every authenticated user. New contact opens the shared modal with an empty draft; clicking a card opens it for editing. Both modes persist with loading and outcome feedback. Edits update the card locally without reads; creation refreshes one bounded page and updates cached counts without aggregations. Import contacts validates an AI-friendly JSON array and creates the complete batch atomically before refreshing authoritative directory data. Separate interaction persistence remains unimplemented. See [the Firestore guide](docs/firestore-contacts.md) for the data contract, index preparation, and explicit synthetic seed command.
 
 ## Federation contract
 

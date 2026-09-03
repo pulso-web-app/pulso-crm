@@ -23,6 +23,7 @@ import { ContactFiltersComponent } from './contact-filters/contact-filters.compo
 import { ContactCardComponent } from './contact-card/contact-card.component';
 import { ContactsListStore } from './contacts-list.store';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ContactImportDialogService } from './contact-import-dialog/contact-import-dialog.service';
 
 function createPortuguesePaginatorIntl(): MatPaginatorIntl {
   const paginatorIntl = new MatPaginatorIntl();
@@ -68,9 +69,11 @@ function createPortuguesePaginatorIntl(): MatPaginatorIntl {
 export class ContactsListComponent implements AfterViewInit, OnDestroy {
   protected readonly store = inject(ContactsListStore);
   private readonly dialog = inject(ContactDialogService);
+  private readonly importDialog = inject(ContactImportDialogService);
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly destroyRef = inject(DestroyRef);
   private createDialogOpen = false;
+  private importDialogOpen = false;
   protected readonly bottomSentinel =
     viewChild<ElementRef<HTMLElement>>('bottomSentinel');
   protected readonly isAtBottom = signal(true);
@@ -108,6 +111,19 @@ export class ContactsListComponent implements AfterViewInit, OnDestroy {
       .subscribe((created) => {
         this.createDialogOpen = false;
         if (created) this.store.applyCreatedContact(created);
+      });
+  }
+
+  protected openImport(): void {
+    if (this.importDialogOpen || this.store.state() !== 'success') return;
+    this.importDialogOpen = true;
+    this.importDialog
+      .open(this.viewContainerRef)
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((importedCount) => {
+        this.importDialogOpen = false;
+        if (importedCount !== undefined) this.store.refreshAfterImport();
       });
   }
 

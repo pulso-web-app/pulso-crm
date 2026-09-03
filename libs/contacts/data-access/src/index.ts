@@ -1,4 +1,5 @@
 export * from './lib/contact.models';
+export * from './lib/contact-import';
 export { normalizeContactSearch } from './lib/contact-document';
 export {
   ContactsRepository,

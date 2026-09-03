@@ -131,6 +131,12 @@ export class ContactsListStore {
     );
   }
 
+  refreshAfterImport(): void {
+    if (this.state() !== 'success' || !this.userId) return;
+    this.summary.set(null);
+    this.refresh();
+  }
+
   changePage(index: number, size: number): void {
     if (this.state() !== 'success' || ![9, 18, 27].includes(size)) return;
     if (size !== this.pageSize()) {

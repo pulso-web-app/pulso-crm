@@ -17,6 +17,7 @@ import {
   startAfter,
   updateDoc,
   where,
+  writeBatch,
 } from 'firebase/firestore';
 import { vi } from 'vitest';
 import { Contact } from './contact.models';
@@ -34,6 +35,7 @@ vi.mock('firebase/firestore', async (importOriginal) =>
       getCountFromServer: vi.fn(),
       updateDoc: vi.fn().mockResolvedValue(undefined),
       addDoc: vi.fn(),
+      writeBatch: vi.fn(),
     },
   ),
 );
@@ -41,6 +43,10 @@ vi.mock('firebase/firestore', async (importOriginal) =>
 describe('ContactsRepository', () => {
   let app: FirebaseApp;
   let repository: ContactsRepository;
+  let batch: {
+    set: ReturnType<typeof vi.fn>;
+    commit: ReturnType<typeof vi.fn>;
+  };
   const filter = { search: '', stage: null, status: null };
   const data = {
     organizationName: 'Órbita',
@@ -52,6 +58,11 @@ describe('ContactsRepository', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    batch = {
+      set: vi.fn(),
+      commit: vi.fn().mockResolvedValue(undefined),
+    };
+    vi.mocked(writeBatch).mockReturnValue(batch as never);
     vi.mocked(addDoc).mockResolvedValue({ id: 'generated-contact' } as never);
     app = initializeApp(
       { projectId: 'unit-tests', apiKey: 'unit-test-key' },
@@ -170,6 +181,72 @@ describe('ContactsRepository', () => {
     await expect(repository.createContact(contact)).rejects.toThrow(
       'permission-denied',
     );
+  });
+
+  it('imports normalized contacts through one atomic commit and returns generated IDs', async () => {
+    const imported = await repository.importContacts([
+      {
+        organizationName: '  Órbita  ',
+        contactName: '  Ana  ',
+        stage: 'contact',
+        status: 'new',
+        lastContactAt: null,
+        activities: [],
+      },
+      {
+        organizationName: 'Farol',
+        stage: 'client',
+        status: 'contacted',
+        lastContactAt: '2026-09-03T14:30:00.000Z',
+        activities: [],
+      },
+    ]);
+    expect(writeBatch).toHaveBeenCalledTimes(1);
+    expect(batch.set).toHaveBeenCalledTimes(2);
+    expect(batch.set.mock.calls[0][1]).toEqual({
+      organizationName: 'Órbita',
+      organizationNameSearch: 'orbita',
+      contactName: 'Ana',
+      stage: 'contact',
+      status: 'new',
+      lastContactAt: null,
+      activities: [],
+    });
+    expect(batch.commit).toHaveBeenCalledTimes(1);
+    expect(imported).toHaveLength(2);
+    expect(imported.every(({ id }) => Boolean(id))).toBe(true);
+  });
+
+  it('rejects an invalid import before allocating or committing a batch', async () => {
+    await expect(
+      repository.importContacts([
+        {
+          organizationName: '',
+          stage: 'contact',
+          status: 'new',
+          lastContactAt: null,
+          activities: [],
+        },
+      ]),
+    ).rejects.toThrow('Invalid contact import');
+    expect(writeBatch).not.toHaveBeenCalled();
+  });
+
+  it('propagates atomic commit failure without returning imported contacts', async () => {
+    batch.commit.mockRejectedValueOnce(new Error('permission-denied'));
+    await expect(
+      repository.importContacts([
+        {
+          organizationName: 'Órbita',
+          stage: 'contact',
+          status: 'new',
+          lastContactAt: null,
+          activities: [],
+        },
+      ]),
+    ).rejects.toThrow('permission-denied');
+    expect(batch.set).toHaveBeenCalledTimes(1);
+    expect(batch.commit).toHaveBeenCalledTimes(1);
   });
 
   it('rejects invalid creation before writing', async () => {

@@ -21,18 +21,28 @@ describe('ContactFiltersComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('requests creation from a button without routing and respects its disabled state', () => {
-    let requests = 0;
-    component.createRequested.subscribe(() => requests++);
-    const button = fixture.nativeElement.querySelector(
+  it('requests import before creation without routing and respects the shared disabled state', () => {
+    let createRequests = 0;
+    let importRequests = 0;
+    component.createRequested.subscribe(() => createRequests++);
+    component.importRequested.subscribe(() => importRequests++);
+    const buttons = fixture.nativeElement.querySelectorAll(
       '.filters-right button',
-    ) as HTMLButtonElement;
-    button.click();
-    expect(requests).toBe(1);
+    ) as NodeListOf<HTMLButtonElement>;
+    expect(buttons[0].textContent).toContain('Importar contatos');
+    expect(buttons[1].textContent).toContain('Novo contato');
+    buttons[0].click();
+    buttons[1].click();
+    expect(importRequests).toBe(1);
+    expect(createRequests).toBe(1);
     fixture.componentRef.setInput('createDisabled', true);
     fixture.detectChanges();
-    button.click();
-    expect(requests).toBe(1);
+    buttons[0].click();
+    buttons[1].click();
+    expect(importRequests).toBe(1);
+    expect(createRequests).toBe(1);
+    expect(buttons[0].disabled).toBe(true);
+    expect(buttons[1].disabled).toBe(true);
     expect(fixture.nativeElement.querySelector('.filters-right a')).toBeNull();
   });
 
