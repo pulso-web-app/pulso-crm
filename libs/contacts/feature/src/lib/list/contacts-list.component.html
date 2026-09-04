@@ -22,14 +22,24 @@
     }
     @case ('signed-out') {
       <section class="empty-state" role="status">
-        <mat-icon aria-hidden="true">lock</mat-icon>
+        <ph-lock
+          class="pulso-icon state-icon"
+          size="48"
+          weight="duotone"
+          aria-hidden="true"
+        />
         <h2>Entre na sua conta para ver os contatos</h2>
         <p>Acesse o Pulso e faça login para abrir o CRM.</p>
       </section>
     }
     @case ('error') {
       <section class="empty-state" role="alert">
-        <mat-icon aria-hidden="true">cloud_off</mat-icon>
+        <ph-cloud-slash
+          class="pulso-icon state-icon"
+          size="48"
+          weight="duotone"
+          aria-hidden="true"
+        />
         <h2>Não foi possível carregar os contatos</h2>
         <p>Verifique sua conexão e tente novamente.</p>
         <button mat-stroked-button (click)="store.retry()">
@@ -71,7 +81,12 @@
         }
       } @else {
         <section class="empty-state" aria-labelledby="empty-state-title">
-          <mat-icon aria-hidden="true">person_search</mat-icon>
+          <ph-user-focus
+            class="pulso-icon state-icon"
+            size="48"
+            weight="duotone"
+            aria-hidden="true"
+          />
           <h2 id="empty-state-title">Nenhum contato encontrado</h2>
           @if (
             store.filter().search ||
@@ -80,7 +95,12 @@
           ) {
             <p>Tente ajustar a busca ou remover os filtros aplicados.</p>
             <button mat-stroked-button (click)="store.clearFilters()">
-              <mat-icon>filter_alt_off</mat-icon> Limpar filtros
+              <ph-funnel-x
+                class="pulso-icon pulso-icon--button-start"
+                size="18"
+                aria-hidden="true"
+              />
+              Limpar filtros
             </button>
           } @else {
             <p>Ainda não há contatos cadastrados.</p>

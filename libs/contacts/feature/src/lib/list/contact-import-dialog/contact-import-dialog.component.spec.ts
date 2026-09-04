@@ -39,6 +39,25 @@ describe('ContactImportDialogComponent', () => {
     fixture.detectChanges();
   });
 
+  it('keeps Material dialog controls while rendering Phosphor icons', () => {
+    const host = fixture.nativeElement as HTMLElement;
+
+    expect(host.querySelector('mat-dialog-content')).not.toBeNull();
+    expect(host.querySelector('mat-dialog-actions')).not.toBeNull();
+    expect(host.querySelector('mat-form-field')).not.toBeNull();
+    expect(host.querySelector('ph-file-arrow-up')).not.toBeNull();
+    expect(host.querySelector('ph-sparkle')).not.toBeNull();
+    expect(host.querySelector('ph-code')).not.toBeNull();
+    expect(host.querySelector('mat-icon')).toBeNull();
+    expect(host.querySelector<HTMLElement>('ph-sparkle')?.classList).toContain(
+      'pulso-icon--button-start',
+    );
+    expect(
+      host.querySelector<HTMLElement>('.import-button-content ph-upload-simple')
+        ?.classList,
+    ).toContain('pulso-icon--inline');
+  });
+
   it('validates edits automatically and enables only valid non-empty input', () => {
     expect(component.result()).toBeNull();
     component.updateSource('[{"organizationName":"Órbita"}]');

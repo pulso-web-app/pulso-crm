@@ -21,6 +21,25 @@ describe('ContactFiltersComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('keeps Material fields, selects, and buttons while rendering Phosphor icons', () => {
+    const host = fixture.nativeElement as HTMLElement;
+
+    expect(host.querySelectorAll('mat-form-field')).toHaveLength(3);
+    expect(host.querySelectorAll('mat-select')).toHaveLength(2);
+    expect(host.querySelector('button[mat-stroked-button]')).not.toBeNull();
+    expect(host.querySelector('button[mat-flat-button]')).not.toBeNull();
+    expect(host.querySelector('ph-magnifying-glass')).not.toBeNull();
+    expect(host.querySelector('ph-upload-simple')).not.toBeNull();
+    expect(host.querySelector('ph-plus')).not.toBeNull();
+    expect(host.querySelector('mat-icon')).toBeNull();
+    expect(
+      host.querySelector<HTMLElement>('ph-magnifying-glass')?.classList,
+    ).toContain('pulso-icon--field-prefix');
+    expect(
+      host.querySelector<HTMLElement>('ph-upload-simple')?.classList,
+    ).toContain('pulso-icon--button-start');
+  });
+
   it('requests import before creation without routing and respects the shared disabled state', () => {
     let createRequests = 0;
     let importRequests = 0;

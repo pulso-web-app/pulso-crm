@@ -27,23 +27,31 @@
       @if (contactForm.instagramHandle().value()) {
         <button
           mat-icon-button
-          class="social-btn social-btn--instagram"
+          class="social-btn social-btn--instagram pulso-icon-button"
           (click)="openInstagram()"
           matTooltip="Abrir Instagram"
           type="button"
         >
-          <mat-icon>camera_alt</mat-icon>
+          <ph-instagram-logo
+            class="pulso-icon pulso-icon--icon-button"
+            size="22"
+            aria-hidden="true"
+          />
         </button>
       }
       @if (contactForm.whatsappNumber().value()) {
         <button
           mat-icon-button
-          class="social-btn social-btn--whatsapp"
+          class="social-btn social-btn--whatsapp pulso-icon-button"
           (click)="openWhatsApp()"
           matTooltip="Abrir WhatsApp"
           type="button"
         >
-          <mat-icon>chat</mat-icon>
+          <ph-whatsapp-logo
+            class="pulso-icon pulso-icon--icon-button"
+            size="22"
+            aria-hidden="true"
+          />
         </button>
       }
     </div>
@@ -101,7 +109,11 @@
       <section class="column column--channels">
         <h3 class="section-title">Canais de contato</h3>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+          floatLabel="always"
+        >
           <mat-label>Instagram</mat-label>
           <input
             matInput
@@ -109,12 +121,19 @@
             [formField]="contactForm.instagramHandle"
             placeholder="@usuario"
           />
-          <mat-icon matPrefix class="channel-icon channel-icon--instagram">
-            camera_alt
-          </mat-icon>
+          <ph-instagram-logo
+            matPrefix
+            class="pulso-icon pulso-icon--field-prefix channel-icon channel-icon--instagram"
+            size="20"
+            aria-hidden="true"
+          />
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+          floatLabel="always"
+        >
           <mat-label>Link do perfil</mat-label>
           <input
             matInput
@@ -122,10 +141,19 @@
             [formField]="contactForm.instagramProfileUrl"
             placeholder="https://instagram.com/..."
           />
-          <mat-icon matPrefix>link</mat-icon>
+          <ph-link
+            matPrefix
+            class="pulso-icon pulso-icon--field-prefix"
+            size="20"
+            aria-hidden="true"
+          />
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+          floatLabel="always"
+        >
           <mat-label>WhatsApp</mat-label>
           <input
             matInput
@@ -138,9 +166,12 @@
             inputmode="tel"
             placeholder="(00) 00000-0000"
           />
-          <mat-icon matPrefix class="channel-icon channel-icon--whatsapp">
-            chat
-          </mat-icon>
+          <ph-whatsapp-logo
+            matPrefix
+            class="pulso-icon pulso-icon--field-prefix channel-icon channel-icon--whatsapp"
+            size="20"
+            aria-hidden="true"
+          />
         </mat-form-field>
       </section>
       <pulso-crm-last-contact-editor
@@ -158,13 +189,25 @@
         <h3 class="section-title">Atividades</h3>
         <button
           mat-icon-button
-          class="add-activity-btn"
+          class="add-activity-btn pulso-icon-button"
           (click)="toggleNewActivityForm()"
           [disabled]="isSaving()"
           matTooltip="Nova atividade"
           type="button"
         >
-          <mat-icon>{{ showNewActivityForm() ? 'close' : 'add' }}</mat-icon>
+          @if (showNewActivityForm()) {
+            <ph-x
+              class="pulso-icon pulso-icon--icon-button"
+              size="20"
+              aria-hidden="true"
+            />
+          } @else {
+            <ph-plus
+              class="pulso-icon pulso-icon--icon-button"
+              size="20"
+              aria-hidden="true"
+            />
+          }
         </button>
       </div>
 
@@ -196,7 +239,11 @@
       <div class="activities-list">
         @if (contactForm.activities().value().length === 0) {
           <div class="empty-activities">
-            <mat-icon>info</mat-icon>
+            <ph-info
+              class="pulso-icon pulso-icon--inline"
+              size="18"
+              aria-hidden="true"
+            />
             <span>Nenhuma atividade registrada.</span>
           </div>
         }
@@ -242,7 +289,12 @@
           <mat-spinner diameter="18" aria-label="Salvando contato" />
           Salvando…
         } @else {
-          <mat-icon>check</mat-icon>
+          <ph-check
+            class="pulso-icon pulso-icon--inline"
+            size="18"
+            weight="bold"
+            aria-hidden="true"
+          />
           Salvar
         }
       </span>

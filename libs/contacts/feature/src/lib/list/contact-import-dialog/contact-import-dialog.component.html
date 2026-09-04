@@ -2,7 +2,7 @@
   <header class="import-dialog__header">
     <div class="import-dialog__heading">
       <span class="import-dialog__icon" aria-hidden="true">
-        <mat-icon>upload_file</mat-icon>
+        <ph-file-arrow-up class="pulso-icon" size="26" weight="duotone" />
       </span>
       <div>
         <h2>Importar contatos</h2>
@@ -26,7 +26,11 @@
           [disabled]="isImporting()"
           (click)="copyPrompt()"
         >
-          <mat-icon>auto_awesome</mat-icon>
+          <ph-sparkle
+            class="pulso-icon pulso-icon--button-start"
+            size="18"
+            aria-hidden="true"
+          />
           Copiar prompt para IA
         </button>
         <button
@@ -35,7 +39,11 @@
           [disabled]="isImporting()"
           (click)="copyFormat()"
         >
-          <mat-icon>data_object</mat-icon>
+          <ph-code
+            class="pulso-icon pulso-icon--button-start"
+            size="18"
+            aria-hidden="true"
+          />
           Copiar formato JSON
         </button>
       </div>
@@ -47,9 +55,19 @@
         [class.feedback--error]="feedback.kind === 'error'"
         [attr.role]="feedback.kind === 'error' ? 'alert' : 'status'"
       >
-        <mat-icon aria-hidden="true">{{
-          feedback.kind === 'error' ? 'error' : 'check_circle'
-        }}</mat-icon>
+        @if (feedback.kind === 'error') {
+          <ph-warning-circle
+            class="pulso-icon pulso-icon--inline"
+            size="18"
+            aria-hidden="true"
+          />
+        } @else {
+          <ph-check-circle
+            class="pulso-icon pulso-icon--inline"
+            size="18"
+            aria-hidden="true"
+          />
+        }
         {{ feedback.message }}
       </p>
     }
@@ -72,19 +90,31 @@
             [disabled]="isImporting()"
             (change)="loadFile($event)"
           />
-          <mat-icon>attach_file</mat-icon>
+          <ph-paperclip
+            class="pulso-icon pulso-icon--inline"
+            size="18"
+            aria-hidden="true"
+          />
           Selecionar arquivo
         </label>
       </div>
 
       @if (fileName()) {
         <p class="file-name">
-          <mat-icon aria-hidden="true">description</mat-icon>{{ fileName() }}
+          <ph-file-text
+            class="pulso-icon pulso-icon--inline"
+            size="18"
+            aria-hidden="true"
+          />{{ fileName() }}
         </p>
       }
       @if (fileError()) {
         <p class="feedback feedback--error" role="alert">
-          <mat-icon aria-hidden="true">error</mat-icon>{{ fileError() }}
+          <ph-warning-circle
+            class="pulso-icon pulso-icon--inline"
+            size="18"
+            aria-hidden="true"
+          />{{ fileError() }}
         </p>
       }
 
@@ -109,7 +139,12 @@
     @if (result(); as validation) {
       @if (validation.valid) {
         <section class="validation validation--success" role="status">
-          <mat-icon aria-hidden="true">check_circle</mat-icon>
+          <ph-check-circle
+            class="pulso-icon pulso-icon--inline"
+            size="22"
+            weight="fill"
+            aria-hidden="true"
+          />
           <div>
             <strong>JSON pronto para importar</strong>
             <span
@@ -123,7 +158,12 @@
       } @else {
         <section class="validation validation--error" role="alert">
           <div class="validation__heading">
-            <mat-icon aria-hidden="true">error</mat-icon>
+            <ph-warning-circle
+              class="pulso-icon pulso-icon--inline"
+              size="22"
+              weight="fill"
+              aria-hidden="true"
+            />
             <strong>Corrija os erros antes de importar</strong>
           </div>
           <ul>
@@ -141,7 +181,11 @@
 
     @if (importError()) {
       <p class="feedback feedback--error" role="alert">
-        <mat-icon aria-hidden="true">cloud_off</mat-icon>{{ importError() }}
+        <ph-cloud-slash
+          class="pulso-icon pulso-icon--inline"
+          size="18"
+          aria-hidden="true"
+        />{{ importError() }}
       </p>
     }
   </mat-dialog-content>
@@ -169,7 +213,11 @@
           <mat-spinner diameter="18" aria-label="Importando contatos" />
           Importando…
         } @else {
-          <mat-icon>upload</mat-icon>
+          <ph-upload-simple
+            class="pulso-icon pulso-icon--inline"
+            size="18"
+            aria-hidden="true"
+          />
           Importar
         }
       </span>

@@ -71,6 +71,25 @@ describe('ContactDetailsEditDialogComponent', () => {
     expect(host.textContent).toContain('Enviou proposta de serviço');
   });
 
+  it('retains Material dialog, form, and date-time controls with Phosphor channel icons', () => {
+    const host = fixture.nativeElement as HTMLElement;
+
+    expect(host.querySelector('mat-dialog-content')).not.toBeNull();
+    expect(host.querySelector('mat-dialog-actions')).not.toBeNull();
+    expect(host.querySelectorAll('mat-form-field').length).toBeGreaterThan(0);
+    expect(host.querySelector('mat-datepicker-toggle')).not.toBeNull();
+    expect(host.querySelector('mat-timepicker-toggle')).not.toBeNull();
+    expect(host.querySelector('ph-instagram-logo')).not.toBeNull();
+    expect(host.querySelector('ph-whatsapp-logo')).not.toBeNull();
+    expect(host.querySelector('ph-clock')).not.toBeNull();
+    expect(host.querySelector('mat-icon')).toBeNull();
+    expect(
+      host.querySelectorAll(
+        '.column--channels mat-form-field[floatlabel="always"]',
+      ),
+    ).toHaveLength(3);
+  });
+
   it('requires an organization name before saving', async () => {
     component.contactForm.organizationName().value.set('');
     component.contactForm.organizationName().markAsTouched();

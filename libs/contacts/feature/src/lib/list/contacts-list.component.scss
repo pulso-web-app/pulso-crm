@@ -59,7 +59,8 @@ mat-paginator.contacts-paginator.is-floating {
   text-align: center;
 }
 
-.empty-state > mat-icon {
+.empty-state > .state-icon {
+  display: inline-flex;
   width: 3rem;
   height: 3rem;
   color: var(--pulso-color-accent);

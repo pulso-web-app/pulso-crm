@@ -1,4 +1,9 @@
-import { Component, inject, signal } from '@angular/core';
+import {
+  Component,
+  CUSTOM_ELEMENTS_SCHEMA,
+  inject,
+  signal,
+} from '@angular/core';
 import { LastContactEditorComponent } from './last-contact-editor.component';
 import {
   BrazilianPhoneMaskDirective,
@@ -14,7 +19,6 @@ import {
   MatDialogContent,
   MatDialogRef,
 } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -31,6 +35,14 @@ import {
   CONTACT_STAGE_OPTIONS,
   CONTACT_STATUS_OPTIONS,
 } from '@pulso-crm/contacts-data-access';
+
+import '@phosphor-icons/webcomponents/PhCheck';
+import '@phosphor-icons/webcomponents/PhInfo';
+import '@phosphor-icons/webcomponents/PhInstagramLogo';
+import '@phosphor-icons/webcomponents/PhLink';
+import '@phosphor-icons/webcomponents/PhPlus';
+import '@phosphor-icons/webcomponents/PhWhatsappLogo';
+import '@phosphor-icons/webcomponents/PhX';
 
 export type ContactDetailsEditDialogData =
   | { readonly mode: 'create'; readonly contact?: never }
@@ -68,13 +80,13 @@ function createFormModel(contact?: Contact): ContactEditForm {
     MatDialogActions,
     MatDialogContent,
     MatDividerModule,
-    MatIconModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatTooltipModule,
     MatProgressSpinnerModule,
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './contact-details-edit-dialog.component.html',
   styleUrl: './contact-details-edit-dialog.component.scss',
 })

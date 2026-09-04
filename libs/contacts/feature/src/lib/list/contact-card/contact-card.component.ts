@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import {
   Component,
+  CUSTOM_ELEMENTS_SCHEMA,
   DestroyRef,
   inject,
   input,
@@ -11,13 +12,19 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterLink } from '@angular/router';
 import { ContactAvatarComponent } from '../contact-avatar/contact-avatar.component';
 import { ContactClassificationComponent } from '../contact-classification/contact-classification.component';
 import { ContactDialogService } from '../contact-details-edit-dialog/contact-dialog.service';
 import { Contact } from '@pulso-crm/contacts-data-access';
+
+import '@phosphor-icons/webcomponents/PhDotsThreeVertical';
+import '@phosphor-icons/webcomponents/PhEye';
+import '@phosphor-icons/webcomponents/PhInstagramLogo';
+import '@phosphor-icons/webcomponents/PhLinkBreak';
+import '@phosphor-icons/webcomponents/PhPencilSimple';
+import '@phosphor-icons/webcomponents/PhWhatsappLogo';
 
 @Component({
   selector: 'pulso-crm-contact-card',
@@ -27,10 +34,10 @@ import { Contact } from '@pulso-crm/contacts-data-access';
     MatButtonModule,
     MatCardModule,
     MatDividerModule,
-    MatIconModule,
     MatMenuModule,
     RouterLink,
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [DatePipe],
   templateUrl: './contact-card.component.html',
   styleUrl: './contact-card.component.scss',

@@ -1,4 +1,10 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  CUSTOM_ELEMENTS_SCHEMA,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
@@ -8,7 +14,6 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -20,6 +25,16 @@ import {
   parseContactImportJson,
 } from '@pulso-crm/contacts-data-access';
 
+import '@phosphor-icons/webcomponents/PhCheckCircle';
+import '@phosphor-icons/webcomponents/PhCloudSlash';
+import '@phosphor-icons/webcomponents/PhCode';
+import '@phosphor-icons/webcomponents/PhFileArrowUp';
+import '@phosphor-icons/webcomponents/PhFileText';
+import '@phosphor-icons/webcomponents/PhPaperclip';
+import '@phosphor-icons/webcomponents/PhSparkle';
+import '@phosphor-icons/webcomponents/PhUploadSimple';
+import '@phosphor-icons/webcomponents/PhWarningCircle';
+
 @Component({
   selector: 'pulso-crm-contact-import-dialog',
   imports: [
@@ -29,10 +44,10 @@ import {
     MatDialogContent,
     MatDividerModule,
     MatFormFieldModule,
-    MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './contact-import-dialog.component.html',
   styleUrl: './contact-import-dialog.component.scss',
 })

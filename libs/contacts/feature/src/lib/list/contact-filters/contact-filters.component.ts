@@ -1,6 +1,12 @@
-import { Component, computed, input, model, output } from '@angular/core';
+import {
+  Component,
+  computed,
+  CUSTOM_ELEMENTS_SCHEMA,
+  input,
+  model,
+  output,
+} from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
@@ -12,6 +18,12 @@ import {
   ContactStatus,
 } from '@pulso-crm/contacts-data-access';
 
+import '@phosphor-icons/webcomponents/PhFunnelX';
+import '@phosphor-icons/webcomponents/PhMagnifyingGlass';
+import '@phosphor-icons/webcomponents/PhPlus';
+import '@phosphor-icons/webcomponents/PhUploadSimple';
+import '@phosphor-icons/webcomponents/PhX';
+
 @Component({
   selector: 'pulso-crm-contact-filters',
   imports: [
@@ -19,9 +31,9 @@ import {
     MatFormFieldModule,
     FormsModule,
     MatButtonModule,
-    MatIconModule,
     MatInputModule,
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './contact-filters.component.html',
   styleUrl: './contact-filters.component.scss',
 })

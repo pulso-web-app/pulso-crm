@@ -3,12 +3,13 @@ import { Component, computed, input } from '@angular/core';
 import {
   MetricCardColor,
   MetricCardComponent,
+  MetricCardIcon,
 } from './metric-card/metric-card.component';
 
 interface ContactMetric {
   readonly title: string;
   readonly value: number;
-  readonly icon: string;
+  readonly icon: MetricCardIcon;
   readonly color: MetricCardColor;
 }
 
@@ -24,43 +25,43 @@ export class ContactMetricCardsComponent {
     {
       title: 'Contatos',
       value: this.summary()['total'],
-      icon: 'groups',
+      icon: 'contacts',
       color: 'primary',
     },
     {
       title: 'Leads Frios',
       value: this.summary()['cold-lead'],
-      icon: 'ac_unit',
+      icon: 'cold-lead',
       color: 'info',
     },
     {
       title: 'Leads Mornos',
       value: this.summary()['warm-lead'],
-      icon: 'device_thermostat',
+      icon: 'warm-lead',
       color: 'info',
     },
     {
       title: 'Leads Quentes',
       value: this.summary()['hot-lead'],
-      icon: 'local_fire_department',
+      icon: 'hot-lead',
       color: 'error',
     },
     {
       title: 'Clientes',
       value: this.summary()['client'],
-      icon: 'how_to_reg',
+      icon: 'client',
       color: 'success',
     },
     {
       title: 'Sem Resposta',
       value: this.summary()['no-response'],
-      icon: 'schedule',
+      icon: 'no-response',
       color: 'default',
     },
     {
       title: 'Não Interessados',
       value: this.summary()['not-interested'],
-      icon: 'do_not_disturb_on',
+      icon: 'not-interested',
       color: 'default',
     },
   ]);

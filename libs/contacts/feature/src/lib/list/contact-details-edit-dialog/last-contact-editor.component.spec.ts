@@ -46,6 +46,17 @@ describe('LastContactEditorComponent', () => {
 
   afterEach(() => vi.useRealTimers());
 
+  it('keeps Material date and time pickers while rendering the Phosphor summary icon', async () => {
+    const { fixture } = await setup();
+    const host = fixture.nativeElement as HTMLElement;
+
+    expect(host.querySelector('mat-datepicker-toggle')).not.toBeNull();
+    expect(host.querySelector('mat-timepicker-toggle')).not.toBeNull();
+    expect(host.querySelectorAll('mat-form-field')).toHaveLength(2);
+    expect(host.querySelector('ph-clock')).not.toBeNull();
+    expect(host.querySelector('mat-icon')).toBeNull();
+  });
+
   it('masks each typed digit and emits the local instant without blur', async () => {
     const { fixture, inputs, changed, invalid } = await setup();
     const expected = [

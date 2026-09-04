@@ -19,7 +19,7 @@ describe('MetricCardComponent', () => {
     fixture = TestBed.createComponent(MetricCardComponent);
     fixture.componentRef.setInput('cardTitle', 'Contatos');
     fixture.componentRef.setInput('cardValue', 1234);
-    fixture.componentRef.setInput('icon', 'groups');
+    fixture.componentRef.setInput('icon', 'contacts');
     fixture.componentRef.setInput('color', 'primary');
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -38,6 +38,7 @@ describe('MetricCardComponent', () => {
       'Contatos',
     );
     expect(host.querySelector('.card-value')?.textContent).toContain('1.234');
-    expect(host.querySelector('mat-icon')?.textContent).toContain('groups');
+    expect(host.querySelector('ph-users-three')).not.toBeNull();
+    expect(host.querySelector('mat-icon')).toBeNull();
   });
 });

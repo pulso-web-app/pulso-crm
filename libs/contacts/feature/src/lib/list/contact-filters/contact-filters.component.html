@@ -1,16 +1,26 @@
 <div class="filters-left">
   <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label>Início do nome da empresa</mat-label>
-    <mat-icon matPrefix>search</mat-icon>
+    <ph-magnifying-glass
+      matPrefix
+      class="pulso-icon pulso-icon--field-prefix"
+      size="18"
+      aria-hidden="true"
+    />
     <input matInput type="text" [(ngModel)]="searchContact" />
     @if (searchContact()) {
       <button
         matSuffix
         matIconButton
+        class="pulso-icon-button"
         aria-label="Limpar busca"
         (click)="searchContact.set('')"
       >
-        <mat-icon>close</mat-icon>
+        <ph-x
+          class="pulso-icon pulso-icon--icon-button"
+          size="18"
+          aria-hidden="true"
+        />
       </button>
     }
   </mat-form-field>
@@ -32,10 +42,15 @@
       <button
         matSuffix
         mat-icon-button
+        class="pulso-icon-button"
         aria-label="Limpar Estágio"
         (click)="selectedStage.set(null); $event.stopPropagation()"
       >
-        <mat-icon>close</mat-icon>
+        <ph-x
+          class="pulso-icon pulso-icon--icon-button"
+          size="18"
+          aria-hidden="true"
+        />
       </button>
     }
   </mat-form-field>
@@ -58,17 +73,26 @@
       <button
         matSuffix
         mat-icon-button
+        class="pulso-icon-button"
         aria-label="Limpar Status"
         (click)="selectedStatus.set(null); $event.stopPropagation()"
       >
-        <mat-icon>close</mat-icon>
+        <ph-x
+          class="pulso-icon pulso-icon--icon-button"
+          size="18"
+          aria-hidden="true"
+        />
       </button>
     }
   </mat-form-field>
 
   @if (hasActiveFilters()) {
     <button mat-button color="primary" (click)="clearAllFilters()">
-      <mat-icon>filter_alt_off</mat-icon>
+      <ph-funnel-x
+        class="pulso-icon pulso-icon--button-start"
+        size="18"
+        aria-hidden="true"
+      />
       Limpar filtros
     </button>
   }
@@ -82,7 +106,11 @@
     [disabled]="createDisabled()"
     (click)="importRequested.emit()"
   >
-    <mat-icon>upload</mat-icon>
+    <ph-upload-simple
+      class="pulso-icon pulso-icon--button-start"
+      size="18"
+      aria-hidden="true"
+    />
     Importar contatos
   </button>
   <button
@@ -92,7 +120,11 @@
     [disabled]="createDisabled()"
     (click)="createRequested.emit()"
   >
-    <mat-icon>add</mat-icon>
+    <ph-plus
+      class="pulso-icon pulso-icon--button-start"
+      size="18"
+      aria-hidden="true"
+    />
     Novo contato
   </button>
 </div>

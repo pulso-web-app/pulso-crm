@@ -49,6 +49,11 @@ describe('ContactCardComponent', () => {
     expect(host.textContent).toContain('Aguardando resposta');
     expect(host.textContent).toContain('@acme.tecnologia');
     expect(host.textContent).toContain('(11) 91234-5678');
+    expect(host.querySelector('mat-card')).not.toBeNull();
+    expect(host.querySelector('ph-instagram-logo')).not.toBeNull();
+    expect(host.querySelector('ph-whatsapp-logo')).not.toBeNull();
+    expect(host.querySelector('ph-dots-three-vertical')).not.toBeNull();
+    expect(host.querySelector('mat-icon')).toBeNull();
   });
 
   it('should expose an accessible actions menu trigger', () => {

@@ -138,6 +138,19 @@ describe('ContactsListComponent', () => {
     };
   }
 
+  it('keeps Material list controls and cards while rendering Phosphor icons', async () => {
+    await loaded();
+    const element = host();
+
+    expect(element.querySelector('mat-form-field')).not.toBeNull();
+    expect(element.querySelector('mat-select')).not.toBeNull();
+    expect(element.querySelector('mat-card')).not.toBeNull();
+    expect(element.querySelector('mat-paginator')).not.toBeNull();
+    expect(element.querySelector('ph-users-three')).not.toBeNull();
+    expect(element.querySelector('ph-link-break')).not.toBeNull();
+    expect(element.querySelector('mat-icon')).toBeNull();
+  });
+
   it('opens one import dialog before New contact and leaves cancellation unchanged', async () => {
     await loaded();
     expect(actionButton('Importar contatos')).toBeTruthy();

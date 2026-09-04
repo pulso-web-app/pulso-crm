@@ -207,7 +207,7 @@ mat-divider {
   padding: 1rem;
   font-size: 0.85rem;
 
-  mat-icon {
+  ph-info {
     font-size: 18px;
     width: 18px;
     height: 18px;
@@ -218,10 +218,6 @@ mat-divider {
   padding: 0.75rem 1.5rem;
   background: var(--pulso-color-section-background, #f8f6fb);
   gap: 0.5rem;
-
-  button mat-icon {
-    margin-right: 0.35rem;
-  }
 }
 
 :host-context(.mat-mdc-dialog-container) {

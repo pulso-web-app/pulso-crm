@@ -57,7 +57,10 @@ mat-card-content {
   font-size: var(--pulso-text-sm);
 }
 
-.contact-channel mat-icon {
+.contact-channel ph-instagram-logo,
+.contact-channel ph-whatsapp-logo,
+.contact-channel ph-link-break {
+  display: inline-flex;
   flex: 0 0 1.125rem;
   width: 1.125rem;
   height: 1.125rem;

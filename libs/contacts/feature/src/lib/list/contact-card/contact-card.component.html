@@ -14,12 +14,17 @@
 
     <button
       matIconButton
-      class="contact-menu"
+      class="contact-menu pulso-icon-button"
       aria-label="Ações para {{ contact().organizationName }}"
       [matMenuTriggerFor]="contactActions"
       (click)="$event.stopPropagation()"
     >
-      <mat-icon>more_vert</mat-icon>
+      <ph-dots-three-vertical
+        class="pulso-icon pulso-icon--icon-button"
+        size="22"
+        weight="bold"
+        aria-hidden="true"
+      />
     </button>
   </mat-card-header>
 
@@ -32,21 +37,33 @@
     <div class="contact-channels">
       @if (contact().instagramHandle; as instagramHandle) {
         <div class="contact-channel">
-          <mat-icon aria-hidden="true">photo_camera</mat-icon>
+          <ph-instagram-logo
+            class="pulso-icon pulso-icon--inline"
+            size="18"
+            aria-hidden="true"
+          />
           <span>{{ instagramHandle }}</span>
         </div>
       }
 
       @if (contact().whatsappNumber; as whatsappNumber) {
         <div class="contact-channel">
-          <mat-icon aria-hidden="true">chat</mat-icon>
+          <ph-whatsapp-logo
+            class="pulso-icon pulso-icon--inline"
+            size="18"
+            aria-hidden="true"
+          />
           <span>{{ whatsappNumber }}</span>
         </div>
       }
 
       @if (!contact().instagramHandle && !contact().whatsappNumber) {
         <div class="contact-channel contact-channel--empty">
-          <mat-icon aria-hidden="true">link_off</mat-icon>
+          <ph-link-break
+            class="pulso-icon pulso-icon--inline"
+            size="18"
+            aria-hidden="true"
+          />
           <span>Sem canais cadastrados</span>
         </div>
       }
@@ -62,11 +79,15 @@
 
 <mat-menu #contactActions="matMenu">
   <a mat-menu-item [routerLink]="[contact().id]">
-    <mat-icon>visibility</mat-icon>
+    <ph-eye class="pulso-icon pulso-icon--menu" size="20" aria-hidden="true" />
     <span>Ver detalhes</span>
   </a>
   <a mat-menu-item [routerLink]="[contact().id, 'edit']">
-    <mat-icon>edit</mat-icon>
+    <ph-pencil-simple
+      class="pulso-icon pulso-icon--menu"
+      size="20"
+      aria-hidden="true"
+    />
     <span>Editar contato</span>
   </a>
 </mat-menu>

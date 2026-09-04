@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   Component,
+  CUSTOM_ELEMENTS_SCHEMA,
   DestroyRef,
   ElementRef,
   effect,
@@ -13,7 +14,6 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ContactDialogService } from './contact-details-edit-dialog/contact-dialog.service';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import {
   MatPaginatorIntl,
   MatPaginatorModule,
@@ -24,6 +24,11 @@ import { ContactCardComponent } from './contact-card/contact-card.component';
 import { ContactsListStore } from './contacts-list.store';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ContactImportDialogService } from './contact-import-dialog/contact-import-dialog.service';
+
+import '@phosphor-icons/webcomponents/PhCloudSlash';
+import '@phosphor-icons/webcomponents/PhFunnelX';
+import '@phosphor-icons/webcomponents/PhLock';
+import '@phosphor-icons/webcomponents/PhUserFocus';
 
 function createPortuguesePaginatorIntl(): MatPaginatorIntl {
   const paginatorIntl = new MatPaginatorIntl();
@@ -52,10 +57,10 @@ function createPortuguesePaginatorIntl(): MatPaginatorIntl {
     ContactFiltersComponent,
     ContactCardComponent,
     MatButtonModule,
-    MatIconModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [
     ContactsListStore,
     {

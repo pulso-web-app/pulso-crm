@@ -1,6 +1,48 @@
 <article class="card-wrapper">
   <div class="card-icon" aria-hidden="true">
-    <mat-icon>{{ icon() }}</mat-icon>
+    @switch (icon()) {
+      @case ('contacts') {
+        <ph-users-three
+          class="pulso-icon metric-icon"
+          size="22"
+          weight="duotone"
+        />
+      }
+      @case ('cold-lead') {
+        <ph-snowflake
+          class="pulso-icon metric-icon"
+          size="22"
+          weight="duotone"
+        />
+      }
+      @case ('warm-lead') {
+        <ph-thermometer-hot
+          class="pulso-icon metric-icon"
+          size="22"
+          weight="duotone"
+        />
+      }
+      @case ('hot-lead') {
+        <ph-fire class="pulso-icon metric-icon" size="22" weight="duotone" />
+      }
+      @case ('client') {
+        <ph-user-check
+          class="pulso-icon metric-icon"
+          size="22"
+          weight="duotone"
+        />
+      }
+      @case ('no-response') {
+        <ph-clock class="pulso-icon metric-icon" size="22" weight="duotone" />
+      }
+      @case ('not-interested') {
+        <ph-prohibit
+          class="pulso-icon metric-icon"
+          size="22"
+          weight="duotone"
+        />
+      }
+    }
   </div>
   <div class="card-content">
     <p class="card-title">{{ cardTitle() }}</p>

@@ -81,3 +81,54 @@ body {
 *::after {
   box-sizing: border-box;
 }
+
+/*
+ * Stable layout boxes for Phosphor custom elements.
+ * Material keeps ownership of control sizing; these classes only normalize the
+ * icon host's baseline and the space between an icon and adjacent content.
+ */
+.pulso-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.pulso-icon--field-prefix {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-inline-start: var(--pulso-space-4);
+  margin-inline-end: var(--pulso-space-2);
+}
+
+.pulso-icon--button-start {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-inline-start: calc(var(--pulso-space-1) * -1);
+  margin-inline-end: var(--pulso-space-2);
+}
+
+.pulso-icon--icon-button,
+.pulso-icon--list {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.pulso-icon--inline {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.pulso-icon--menu {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-inline-end: var(--pulso-space-4);
+}
+
+button.pulso-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

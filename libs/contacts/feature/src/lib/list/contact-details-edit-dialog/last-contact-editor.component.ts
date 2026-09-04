@@ -1,4 +1,11 @@
-import { Component, effect, input, output, signal } from '@angular/core';
+import {
+  Component,
+  CUSTOM_ELEMENTS_SCHEMA,
+  effect,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -13,13 +20,14 @@ import {
 import { MatTimepickerModule } from '@angular/material/timepicker';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { DateTimeMaskDirective } from './date-time-mask.directive';
 import {
   BRAZILIAN_DATE_FORMATS,
   BrazilianDateAdapter,
   brazilianDatepickerLabels,
 } from './brazilian-date-adapter';
+
+import '@phosphor-icons/webcomponents/PhClock';
 
 @Component({
   selector: 'pulso-crm-last-contact-editor',
@@ -30,8 +38,8 @@ import {
     MatTimepickerModule,
     MatInputModule,
     MatButtonModule,
-    MatIconModule,
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [
     { provide: MatDatepickerIntl, useFactory: brazilianDatepickerLabels },
     { provide: DateAdapter, useClass: BrazilianDateAdapter },
@@ -41,8 +49,11 @@ import {
   template: `
     <div class="last-contact-summary">
       <span class="info-badge"
-        ><mat-icon>schedule</mat-icon>Último contato:
-        <strong>{{ label() }}</strong></span
+        ><ph-clock
+          class="pulso-icon pulso-icon--inline"
+          size="18"
+          aria-hidden="true"
+        />Último contato: <strong>{{ label() }}</strong></span
       >
       <button
         mat-button
@@ -138,12 +149,6 @@ import {
       border-radius: 10px;
       background: var(--pulso-color-primary-container, #f8f6fb);
       border: 1px solid rgba(103, 80, 164, 0.1);
-    }
-    .info-badge mat-icon {
-      flex-shrink: 0;
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
     }
     .date-time-fields {
       display: grid;
